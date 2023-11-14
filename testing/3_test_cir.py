@@ -2,7 +2,7 @@ from tdt import DSPCircuit
 
 try:
 	circuit = DSPCircuit(
-						circuit_name = 'test_circuit', 
+						circuit_name = 'test_circuit 3', 
 						device_name = 'RX8',
 						interface = 'GB',
 						device_id = 1,
@@ -16,15 +16,22 @@ except DSPError as e:
 if circuit.is_connected:
 	print('Hardware is Connected')
 
-if circuit.is_loaded:
-	print('Microcode Loaded')
+print('Program is Running')
+print('Waiting for Commands: t - trigger / s - stop')
+while(circuit.is_running):
+	circuit.start()
 
-if circuit.is_running:
-	print('Running')
+	command = input()
+	if 't' in command:
+		circuit.trigger(trigger='A', mode='high')
 
-print(circuit)
+	if 's' in command:
+		circuit.stop()
+		break
 
-circuit.print_tag_info()
+
+
+
 
 
 

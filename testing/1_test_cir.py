@@ -2,7 +2,7 @@ from tdt import DSPCircuit
 
 try:
 	circuit = DSPCircuit(
-						circuit_name = 'test_circuit', 
+						circuit_name = 'test_circuit 1', 
 						device_name = 'RX8',
 						interface = 'GB',
 						device_id = 1,
