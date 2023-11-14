@@ -1,14 +1,13 @@
-from tdt import DSPCircuit
+from tdt import DSPProject
+from numpy import arange, sin, pi
 
 try:
-	circuit = DSPCircuit(
-						circuit_name = 'test_circuit 3', 
-						device_name = 'RX8',
-						interface = 'GB',
-						device_id = 1,
-						load = True,
-						start = False,
-						address = None)
+	project = DSPProject()
+	circuit = project.load_circuit(
+		circuit_name = 'test_circuit 3', 
+		device_name = 'RX8')
+	circuit.start()
+
 
 except DSPError as e:
 	print ("Error: {}".format(e))
@@ -16,20 +15,11 @@ except DSPError as e:
 if circuit.is_connected:
 	print('Hardware is Connected')
 
-print('Program is Running')
-print('Waiting for Commands: t - trigger / s - stop')
-while(circuit.is_running):
-	circuit.start()
 
-	command = input()
-	if 't' in command:
-		circuit.trigger(trigger='A', mode='high')
-
-	if 's' in command:
-		circuit.stop()
-		break
-
-
+t = arange(0, 1, circuit.fs**-1)
+waveform = sin(2*pi*1e3*t)
+speaker_buffer = circuit.get_buffer(data_tag='speaker', mode='w')
+speaker_buffer.write(waveform)
 
 
 
