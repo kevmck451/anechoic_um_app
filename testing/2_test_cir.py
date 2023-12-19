@@ -17,14 +17,15 @@ if circuit.is_connected:
 	print('Hardware is Connected')
 
 print('Program is Running')
+
 while(circuit.is_running):
 	circuit.start()
 
 	command = input()
-	if 'trigger' in command:
+	if 't' in command:
 		circuit.trigger(trigger = 1)
 
-	if 'stop' in command:
+	if 's' in command:
 		circuit.stop()
 		break
 
