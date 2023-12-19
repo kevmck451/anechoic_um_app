@@ -1,8 +1,0 @@
-# links
-
-# kevmck repo
-https://github.com/kevmck451/anechoic_um_app
-
-
-# tdtpy github
-https://github.com/LABSN/tdtpy
