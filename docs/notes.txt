@@ -1,0 +1,48 @@
+# Notes
+
+the rpvds circuit will need to be in the same directory as run_rpvds.py file
+
+
+
+# 11/14/23
+
+need to look into how to use buffers
+
+need to look into opening audio files in python and inserting them into the buffers
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
