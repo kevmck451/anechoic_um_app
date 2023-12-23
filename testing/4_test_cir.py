@@ -1,8 +1,7 @@
-from tdt import DSPProject, DSPCircuit, DSPBuffer
-from audio_abstract import Audio_Abstract
+from tdt import DSPProject
+from app.circuit_control.audio_abstract import Audio_Abstract
 
 import numpy as np
-import wave
 
 try:
 	project = DSPProject()

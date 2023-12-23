@@ -1,6 +1,10 @@
 from tdt import DSPProject
 
 
+stimulus_number = int()
+
+
+
 # Function to start TDT Connection
 def TDT_connection(RPvds_circuit_name):
     try:

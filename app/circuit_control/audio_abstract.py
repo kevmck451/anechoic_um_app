@@ -41,7 +41,6 @@ class Audio_Abstract:
             raise Exception('Max Value is Zero')
 
 
-
     def __str__(self):
         return f'---------Audio Object---------\n' \
                f'path: {self.path}\n' \
