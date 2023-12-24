@@ -4,7 +4,10 @@ from PIL import Image, ImageTk
 from threading import Thread
 import time
 
-from circuit_control import circuit_data
+import circuit_data
+import headset_manager
+import circuit_manager
+from circuit_data import Warmup
 
 
 
@@ -67,113 +70,190 @@ def run_app_1():
 
 class App(ctk.CTk):
 
-    def __init__(self):
+    def __init__(self, warmup_class):
         super().__init__()
 
         self.title("University of Memphis | Hearing Aid Research Laboratory | Sound Localization Experiment")
         self.geometry("1400x800")
 
-        x_pad_main = 10
-        y_pad_main = 10
-        x_pad_1 = 10
-        y_pad_1 = 10
-        x_pad_2 = 10
-        y_pad_2 = 10
-        font_size = 20
+        self.x_pad_main = 10
+        self.y_pad_main = 10
+        self.x_pad_1 = 10
+        self.y_pad_1 = 10
+        self.x_pad_2 = 10
+        self.y_pad_2 = 10
+        self.font_size = 20
+
+        self.Warmup_Class = warmup_class
 
         # Top Frame
         top_frame = ctk.CTkFrame(self)
-        top_frame.pack(padx=x_pad_main, pady=y_pad_main, side='top', fill='both', expand=True)
+        top_frame.pack(padx=self.x_pad_main, pady=self.y_pad_main, side='top', fill='both', expand=True)
 
         # Sub Frames for Top Frame
         hardware_status_frame = ctk.CTkFrame(top_frame)
-        hardware_status_frame.pack(padx=x_pad_1, pady=y_pad_1, side='left', fill='both', expand=True)
+        hardware_status_frame.pack(padx=self.x_pad_1, pady=self.y_pad_1, side='left', fill='both', expand=True)
         warmup_frame = ctk.CTkFrame(top_frame)
-        warmup_frame.pack(padx=x_pad_1, pady=y_pad_1, side='right', fill='both', expand=True)
+        warmup_frame.pack(padx=self.x_pad_1, pady=self.y_pad_1, side='right', fill='both', expand=True)
+
 
 
         # Hardware Connection Indicators
-        self.tdt_status = ctk.CTkLabel(hardware_status_frame, text="TDT Hardware: Connected", text_color="green", font=("default_font", font_size)) # TODO: connection function
-        self.tdt_status.pack(padx=x_pad_2, pady=y_pad_2, side='top', fill='both', expand=True)
-        self.vr_status = ctk.CTkLabel(hardware_status_frame, text="VR Headset: Connected", text_color="green", font=("default_font", font_size)) # TODO: connection function
-        self.vr_status.pack(padx=x_pad_2, pady=y_pad_2, side='bottom', fill='both', expand=True)
+        if circuit_manager.TDT_connection(0):
+            connection_status = 'TDT Hardware: Connected'
+            text_color = 'green'
+        else:
+            connection_status = 'TDT Hardware: Not Connected'
+            text_color = 'red'
+
+        self.tdt_status = ctk.CTkLabel(hardware_status_frame, text=connection_status, text_color=text_color, font=("default_font", self.font_size))  # TODO: connection function
+        self.tdt_status.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='top', fill='both', expand=True)
+
+
+        if headset_manager.headset_connection():
+            connection_status = 'VR Headset: Connected'
+            text_color = 'green'
+        else:
+            connection_status = 'VR Headset: Not Connected'
+            text_color = 'red'
+
+        self.vr_status = ctk.CTkLabel(hardware_status_frame, text=connection_status, text_color=text_color, font=("default_font", self.font_size))  # TODO: connection function
+        self.vr_status.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='top', fill='both', expand=True)
+
+        # Reset Button
+        self.reset_button = ctk.CTkButton(hardware_status_frame, text='Reset', font=("default_font", self.font_size), command=lambda:print('Resetting'))
+        self.reset_button.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='bottom', fill='both', expand=True)
+
+        warmup_thread = Thread(target=self.Warmup_Class.start_warmup)
 
         # Warmup Widgets
-        self.warmup_frame = ctk.CTkButton(warmup_frame, text="Play Warmup", font=("default_font", font_size), command=circuit_data.test_warmup_data)
-        self.warmup_frame.pack(padx=x_pad_2, pady=y_pad_2, side='top', fill='both', expand=True)
-        self.warmup_frame = ctk.CTkButton(warmup_frame, text="Visual of Each Test", font=("default_font", font_size), command=circuit_data.test_warmup_data)
-        self.warmup_frame.pack(padx=x_pad_2, pady=y_pad_2, side='bottom', fill='both', expand=True)
+        self.warmup_frame = ctk.CTkButton(warmup_frame, text="Play Warmup", font=("default_font", self.font_size), command=warmup_thread.start)
+        self.warmup_frame.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='top', fill='both', expand=True)
+
+        # Visual of Five Selections
+
+        # Sub Sub Frame of Warm Up
+        warmup_frame_sub = ctk.CTkFrame(warmup_frame)
+        warmup_frame_sub.pack(padx=self.x_pad_1, pady=self.y_pad_1, side='right', fill='both', expand=True)
+
+        print(self.Warmup_Class.test1_answered)
+
+        if self.Warmup_Class.test1_answered:
+            if self.Warmup_Class.test1:
+                test1_text_color = 'green'
+            else: test1_text_color = 'red'
+        else:
+            test1_text_color = 'gray'
+        self.warmup_frame_sub = ctk.CTkLabel(warmup_frame_sub, text='Test 1', text_color=test1_text_color, font=("default_font", self.font_size))
+        self.warmup_frame_sub.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='left', fill='both', expand=True)
+
+        if self.Warmup_Class.test2_answered:
+            if self.Warmup_Class.test2:
+                test2_text_color = 'green'
+            else: test2_text_color = 'red'
+        else:
+            test2_text_color = 'gray'
+        self.warmup_frame_sub = ctk.CTkLabel(warmup_frame_sub, text='Test 2', text_color=test2_text_color, font=("default_font", self.font_size))
+        self.warmup_frame_sub.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='left', fill='both', expand=True)
+
+        if self.Warmup_Class.test3_answered:
+            if self.Warmup_Class.test3:
+                test3_text_color = 'green'
+            else: test3_text_color = 'red'
+        else:
+            test3_text_color = 'gray'
+        self.warmup_frame_sub = ctk.CTkLabel(warmup_frame_sub, text='Test 3', text_color=test3_text_color, font=("default_font", self.font_size))
+        self.warmup_frame_sub.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='left', fill='both', expand=True)
+
+        if self.Warmup_Class.test4_answered:
+            if self.Warmup_Class.test4:
+                test4_text_color = 'green'
+            else: test4_text_color = 'red'
+        else:
+            test4_text_color = 'gray'
+        self.warmup_frame_sub = ctk.CTkLabel(warmup_frame_sub, text='Test 4', text_color=test4_text_color, font=("default_font", self.font_size))
+        self.warmup_frame_sub.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='left', fill='both', expand=True)
+
+        if self.Warmup_Class.test5_answered:
+            if self.Warmup_Class.test5:
+                test5_text_color = 'green'
+            else: test5_text_color = 'red'
+        else:
+            test5_text_color = 'gray'
+        self.warmup_frame_sub = ctk.CTkLabel(warmup_frame_sub, text='Test 5', text_color=test5_text_color, font=("default_font", self.font_size))
+        self.warmup_frame_sub.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='right', fill='both', expand=True)
+
 
 
         # Middle Frame
         middle_frame = ctk.CTkFrame(self)
-        middle_frame.pack(padx=x_pad_main, pady=y_pad_main, side='top', fill='both', expand=True)
+        middle_frame.pack(padx=self.x_pad_main, pady=self.y_pad_main, side='top', fill='both', expand=True)
 
         # Sub Frames for Middle Frame
         stimulus_frame = ctk.CTkFrame(middle_frame)
-        stimulus_frame.pack(padx=x_pad_1, pady=y_pad_1, side='left', expand=True, fill='both')
+        stimulus_frame.pack(padx=self.x_pad_1, pady=self.y_pad_1, side='left', expand=True, fill='both')
         exp_metadata_frame = ctk.CTkFrame(middle_frame)
-        exp_metadata_frame.pack(padx=x_pad_1, pady=y_pad_1, side='right', expand=True, fill='both')
+        exp_metadata_frame.pack(padx=self.x_pad_1, pady=self.y_pad_1, side='right', expand=True, fill='both')
 
         # Description
         description_text = 'Select Experiment to Load'
-        description_label = ctk.CTkLabel(stimulus_frame, text=description_text)
-        description_label.pack(padx=x_pad_2, pady=y_pad_2, side='top', fill='both', expand=True)
+        description_label = ctk.CTkLabel(stimulus_frame, text=description_text, font=("default_font", self.font_size))
+        description_label.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='top', fill='both', expand=True)
 
         # Dropdown Box
         dropdown_values=[f'Experiment {x}' for x in range(1, 21)]
         self.option_var = tk.StringVar()
-        self.dropdown = ctk.CTkOptionMenu(stimulus_frame, variable=self.option_var, values=dropdown_values, font=("default_font", font_size))
-        self.dropdown.pack(padx=x_pad_2, pady=y_pad_2, side='top', fill='both', expand=True)
+        self.dropdown = ctk.CTkOptionMenu(stimulus_frame, variable=self.option_var, values=dropdown_values, font=("default_font", self.font_size))
+        self.dropdown.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='top', fill='both', expand=True)
         self.dropdown.bind('<Configure>', self.update_info)
 
         # Load Experiment Button
-        self.experiment_frame = ctk.CTkButton(stimulus_frame, text='Load Experiment', font=("default_font", font_size),command=circuit_data.test_warmup_data)
-        self.experiment_frame.pack(padx=x_pad_2, pady=y_pad_2, side='bottom', fill='both', expand=True)
+        self.experiment_frame = ctk.CTkButton(stimulus_frame, text='Load Experiment', font=("default_font", self.font_size),command=circuit_data.test_warmup_data)
+        self.experiment_frame.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='bottom', fill='both', expand=True)
 
         # Experiment Metadata Info Box
-        self.info_label = ctk.CTkLabel(exp_metadata_frame, text="Experiment Info:", font=("default_font", font_size))
+        self.info_label = ctk.CTkLabel(exp_metadata_frame, text="Experiment Info:", font=("default_font", self.font_size))
         self.info_label.pack(expand=True)
 
 
         # Bottom Frame
         bottom_frame = ctk.CTkFrame(self)
-        bottom_frame.pack(padx=x_pad_main, pady=y_pad_main, side='bottom', fill='both', expand=True)
+        bottom_frame.pack(padx=self.x_pad_main, pady=self.y_pad_main, side='bottom', fill='both', expand=True)
 
         # Sub Frames for Bottom Frame
         stimulus_number_frame = ctk.CTkFrame(bottom_frame)
-        stimulus_number_frame.pack(padx=x_pad_1, pady=y_pad_1, side='left', expand=True, fill='both')
+        stimulus_number_frame.pack(padx=self.x_pad_1, pady=self.y_pad_1, side='left', expand=True, fill='both')
         exp_widgets_frame = ctk.CTkFrame(bottom_frame)
-        exp_widgets_frame.pack(padx=x_pad_1, pady=y_pad_1, side='left', expand=True, fill='both')
+        exp_widgets_frame.pack(padx=self.x_pad_1, pady=self.y_pad_1, side='left', expand=True, fill='both')
         actions_frame = ctk.CTkFrame(bottom_frame)
-        actions_frame.pack(padx=x_pad_1, pady=y_pad_1, side='right', expand=True, fill='both')
+        actions_frame.pack(padx=self.x_pad_1, pady=self.y_pad_1, side='right', expand=True, fill='both')
 
         # Stimulus Number
-        self.stimulus_number_frame = ctk.CTkButton(stimulus_number_frame, text='Stimulus Number', font=("default_font", font_size), command=circuit_data.test_warmup_data)
-        self.stimulus_number_frame.pack(padx=x_pad_2, pady=y_pad_2, side='top', fill='both', expand=True)
+        self.stimulus_number_frame = ctk.CTkButton(stimulus_number_frame, text='Stimulus Number', font=("default_font", self.font_size), command=circuit_data.test_warmup_data)
+        self.stimulus_number_frame.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='top', fill='both', expand=True)
         # Manual Entry Button
-        self.stimulus_number_frame = ctk.CTkButton(stimulus_number_frame, text='Manual Entry', font=("default_font", font_size), command=circuit_data.test_warmup_data)
-        self.stimulus_number_frame.pack(padx=x_pad_2, pady=y_pad_2, side='top', fill='both', expand=True)
+        self.stimulus_number_frame = ctk.CTkButton(stimulus_number_frame, text='Manual Entry', font=("default_font", self.font_size), command=circuit_data.test_warmup_data)
+        self.stimulus_number_frame.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='top', fill='both', expand=True)
         # Stimulus Dropdown Box
         dropdown_values = [f'Stimulus Number: {x}' for x in range(1, 101)]
         self.option_var = tk.StringVar()
-        self.dropdown = ctk.CTkOptionMenu(stimulus_number_frame, variable=self.option_var, values=dropdown_values, font=("default_font", font_size))
-        self.dropdown.pack(padx=x_pad_2, pady=y_pad_2, side='bottom', fill='both', expand=True)
+        self.dropdown = ctk.CTkOptionMenu(stimulus_number_frame, variable=self.option_var, values=dropdown_values, font=("default_font", self.font_size))
+        self.dropdown.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='bottom', fill='both', expand=True)
         self.dropdown.bind('<Configure>', self.update_info)
 
         # Experiment Widgets
-        self.exp_widgets_frame = ctk.CTkButton(exp_widgets_frame, text='Time', font=("default_font", font_size), command=circuit_data.test_warmup_data)
-        self.exp_widgets_frame.pack(padx=x_pad_2, pady=y_pad_2, side='top', fill='both', expand=True)
-        self.exp_widgets_frame = ctk.CTkButton(exp_widgets_frame, text='Selection Made', font=("default_font", font_size), command=circuit_data.test_warmup_data)
-        self.exp_widgets_frame.pack(padx=x_pad_2, pady=y_pad_2, side='bottom', fill='both', expand=True)
+        self.exp_widgets_frame = ctk.CTkButton(exp_widgets_frame, text='Total Time', font=("default_font", self.font_size), command=circuit_data.test_warmup_data)
+        self.exp_widgets_frame.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='top', fill='both', expand=True)
+        self.exp_widgets_frame = ctk.CTkButton(exp_widgets_frame, text='Selection Made', font=("default_font", self.font_size), command=circuit_data.test_warmup_data)
+        self.exp_widgets_frame.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='bottom', fill='both', expand=True)
 
         # Action Buttons
-        self.actions_frame = ctk.CTkButton(actions_frame, text='Start', font=("default_font", font_size), command=circuit_data.test_warmup_data)
-        self.actions_frame.pack(padx=x_pad_2, pady=y_pad_2, side='top', fill='both', expand=True)
-        self.actions_frame = ctk.CTkButton(actions_frame, text='Pause', font=("default_font", font_size), command=circuit_data.test_warmup_data)
-        self.actions_frame.pack(padx=x_pad_2, pady=y_pad_2, side='top', fill='both', expand=True)
-        self.actions_frame = ctk.CTkButton(actions_frame, text='End', font=("default_font", font_size), command=circuit_data.test_warmup_data)
-        self.actions_frame.pack(padx=x_pad_2, pady=y_pad_2, side='bottom', fill='both', expand=True)
+        self.actions_frame = ctk.CTkButton(actions_frame, text='Start', font=("default_font", self.font_size), command=circuit_data.test_num_audio_channels)
+        self.actions_frame.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='top', fill='both', expand=True)
+        self.actions_frame = ctk.CTkButton(actions_frame, text='Pause', font=("default_font", self.font_size), command=circuit_data.test_warmup_data)
+        self.actions_frame.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='top', fill='both', expand=True)
+        self.actions_frame = ctk.CTkButton(actions_frame, text='End', font=("default_font", self.font_size), command=circuit_data.test_warmup_data)
+        self.actions_frame.pack(padx=self.x_pad_2, pady=self.y_pad_2, side='bottom', fill='both', expand=True)
 
 
 
@@ -184,12 +264,24 @@ class App(ctk.CTk):
 
 
 
+
+
+
 if __name__ == "__main__":
-    app = App()
+    Warmup_Class = Warmup()
+    app = App(Warmup_Class)
 
     # For cross-platform compatibility, especially if using formats other than .ico
     img = Image.open('../docs/harl_logo.png')
     icon = ImageTk.PhotoImage(img)
     app.tk.call('wm', 'iconphoto', app._w, icon)
 
+
+
+
+
+
     app.mainloop()
+
+
+    # run_app_1()

@@ -1,6 +1,7 @@
 from audio_abstract import Audio_Abstract
 from utils import CSVFile
 import numpy as np
+import time
 
 project_base_path = '/Users/KevMcK/Dropbox/2 Work/4 Anechoic Chamber/anechoic_um_app'
 
@@ -75,6 +76,55 @@ def load_warmup_data():
     # print(channel_buffer)
 
     return audio_sample_buffer, channel_buffer
+
+
+# -------------------------------------------------
+# ACTIONS -----------------------------------------
+# _________________________________________________
+def warmup_sequence():
+    print('Warmup Sequence Initiated')
+
+
+class Warmup:
+    def __init__(self):
+
+        self.test_audio_buffer, self.test_channel_buffer = load_warmup_data()
+        self.status = False
+        self.test1_answered = False
+        self.test1 = False
+        self.test2_answered = False
+        self.test2 = False
+        self.test3_answered = False
+        self.test3 = False
+        self.test4_answered = False
+        self.test4 = False
+        self.test5_answered = False
+        self.test5 = False
+
+    def start_warmup(self):
+        self.status = True
+        print('Playing Sample 1')
+        time.sleep(1)
+        self.test1_answered = True
+        self.test1 = True
+        print('Playing Sample 2')
+        time.sleep(1)
+        self.test2_answered = True
+        self.test2 = False
+        print('Playing Sample 3')
+        time.sleep(1)
+        self.test3_answered = True
+        self.test3 = True
+        print('Playing Sample 4')
+        time.sleep(1)
+        self.test4_answered = True
+        self.test4 = False
+        print('Playing Sample 5')
+        time.sleep(1)
+        self.test5_answered = True
+        self.test5 = True
+
+
 
 
 # -------------------------------------------------
