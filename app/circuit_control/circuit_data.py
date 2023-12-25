@@ -9,6 +9,40 @@ project_base_path = '/Users/KevMcK/Dropbox/2 Work/4 Anechoic Chamber/anechoic_um
 # -------------------------------------------------
 # LOADING DATA   ----------------------------------
 # _________________________________________________
+# Build list of exp names
+def load_audio_names(experiment_number):
+
+    audio_csv_filepath = f'{project_base_path}/experiment files/samples.csv'
+    audio_csv = CSVFile(file_path=audio_csv_filepath)
+    sample_numbers = audio_csv.get_column(column_name=f'ex{experiment_number}')
+
+    sample_names = {'1': 'cactus',
+                    '2': 'donkey',
+                    '3': 'dove',
+                    '4': 'envelope',
+                    '5': 'glove',
+                    '6': 'glue',
+                    '7': 'grass',
+                    '8': 'grasshopper',
+                    '9': 'guitar',
+                    '10': 'ice',
+                    '11': 'lemon',
+                    '12': 'lettuce',
+                    '13': 'nail',
+                    '14': 'orange',
+                    '15': 'owl',
+                    '16': 'vegetable',
+                    '17': 'violin',
+                    '18': 'window',
+                    '19': 'woodpecker',
+                    '20': 'zebra'}
+
+    sample_names_list = []
+    for number in sample_numbers:
+        sample_name = sample_names.get(number)
+        sample_names_list.append(sample_name)
+
+    return sample_names_list
 
 # Build list of audio objects in correct order from file
 def load_audio_samples(experiment_number):
@@ -41,6 +75,7 @@ def load_audio_samples(experiment_number):
 
     for number in sample_numbers:
         sample_name = sample_names.get(number)
+
         # print(sample_name)
         for i in range(1, 6):
             audio_name = f'{sample_name}_{i}.wav'
@@ -89,7 +124,7 @@ class Warmup:
     def __init__(self):
 
         self.test_audio_buffer, self.test_channel_buffer = load_warmup_data()
-        self.status = False
+        self.warmup_status = False
         self.test1_answered = False
         self.test1 = False
         self.test2_answered = False
@@ -102,7 +137,7 @@ class Warmup:
         self.test5 = False
 
     def start_warmup(self):
-        self.status = True
+        self.warmup_status = True
         print('Playing Sample 1')
         time.sleep(1)
         self.test1_answered = True

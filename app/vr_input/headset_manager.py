@@ -1,3 +1,5 @@
+import numpy as np
+
 import circuit_data
 
 
@@ -18,7 +20,9 @@ def get_test_results():
 
 
 
-
+def get_vr_input():
+    random = np.random.choice([True, False])
+    return random
 
 
 
