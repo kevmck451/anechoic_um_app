@@ -9,6 +9,8 @@ import circuit_data
 import headset_manager
 import circuit_manager
 from circuit_data import Warmup
+from circuit_manager import TDT_Circuit
+from headset_manager import VR_Headset_Hardware
 
 
 
@@ -35,18 +37,19 @@ class App(ctk.CTk):
         self.minsize(1000,600)
 
         # Padding and Font Styles
-        self.x_pad_main = 0
-        self.y_pad_main = 0
+        self.x_pad_main = 2
+        self.y_pad_main = 2
         self.x_pad_1 = 10
         self.y_pad_1 = 10
         self.x_pad_2 = 10
         self.y_pad_2 = 10
         self.font_size = 26
         self.fg_color = '#578CD5'
+        self.hover_color = '#496FA3'
 
         # Widgets ---------------------------------------------------------------
-
-        # Widgets
+        self.circuit = TDT_Circuit()
+        self.headset = VR_Headset_Hardware()
 
         self.right_frame = Right_Frame(self)
         self.left_frame = Left_Frame(self, self.right_frame)
@@ -81,7 +84,7 @@ class Right_Frame(ctk.CTkFrame):
         y_pad = 5
 
         # Experiment Metadata Info Box (Title)
-        self.main_info_label = ctk.CTkLabel(frame, text="Experiment Info:", font=font_style)
+        self.main_info_label = ctk.CTkLabel(frame, text="Sample Audio Order:", font=font_style)
         self.main_info_label.grid(row=0, column=0, padx=x_pad, pady=y_pad, sticky='ew')
 
         self.stim_labels = [ctk.CTkLabel(frame, text=f"Stim {i}:", font=("default_font", 12)) for i in range(1, 21)]
@@ -101,6 +104,7 @@ class Left_Frame(ctk.CTkFrame):
     def __init__(self, parent, console_frame):
         super().__init__(parent)
         self.console_frame = console_frame
+        self.parent = parent
         # Top Frame
         top_frame = ctk.CTkFrame(self)
         top_frame.grid(row=0, column=0, padx=parent.x_pad_main, pady=parent.y_pad_main, sticky='nsew')
@@ -183,24 +187,33 @@ class Left_Frame(ctk.CTkFrame):
         frame.grid_rowconfigure(1, weight=1)
 
         # TDT Connection Status
-        connection_status_TDT = 'TDT Hardware: Not Connected'
-        text_color_TDT = '#BD2E2E'
+        if self.parent.circuit.circuit_state:
+            connection_status_TDT = 'TDT Hardware: Connected'
+            text_color_TDT = '#2B881A'
+        else:
+            connection_status_TDT = 'TDT Hardware: Not Connected'
+            text_color_TDT = '#BD2E2E'
 
-        self.tdt_status = ctk.CTkLabel(frame, text=connection_status_TDT, text_color='white', font=("default_font", parent.font_size), fg_color=text_color_TDT)
+        self.tdt_status = ctk.CTkLabel(frame, text=connection_status_TDT, text_color=text_color_TDT, font=("default_font", parent.font_size))
         self.tdt_status.grid(row=0, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
         # TDT Reset Button
-        self.reset_button_TDT = ctk.CTkButton(frame, text='TDT Reset', font=("default_font", parent.font_size), fg_color=parent.fg_color)
+        self.reset_button_TDT = ctk.CTkButton(frame, text='TDT Reset', font=("default_font", parent.font_size), fg_color=parent.fg_color, command=self.reset_tdt_hardware)
         self.reset_button_TDT.grid(row=0, column=1, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
         # VR Connection Status
-        connection_status_VR = 'VR Headset: Not Connected'
-        text_color_VR = '#BD2E2E'
-        self.vr_status = ctk.CTkLabel(frame, text=connection_status_VR, text_color='white', font=("default_font", parent.font_size), fg_color=text_color_VR)
+        if self.parent.headset.headset_state:
+            connection_status_VR = 'VR Headset: Connected'
+            text_color_VR = '#2B881A'
+        else:
+            connection_status_VR = 'VR Headset: Not Connected'
+            text_color_VR = '#BD2E2E'
+
+        self.vr_status = ctk.CTkLabel(frame, text=connection_status_VR, text_color=text_color_VR, font=("default_font", parent.font_size))
         self.vr_status.grid(row=1, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
         # VR Reset Button
-        self.reset_button_VR = ctk.CTkButton(frame, text='VR Reset', font=("default_font", parent.font_size), fg_color=parent.fg_color)
+        self.reset_button_VR = ctk.CTkButton(frame, text='VR Reset', font=("default_font", parent.font_size), fg_color=parent.fg_color, command=self.reset_headset_hardware)
         self.reset_button_VR.grid(row=1, column=1, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
     def select_experiment(self, parent, frame):
@@ -229,7 +242,7 @@ class Left_Frame(ctk.CTkFrame):
         frame.grid_columnconfigure(0, weight=1)  # Single column
 
         # Sub Sub Frame of Warm Up ----------------------------------------
-        self.warmup_button = ctk.CTkButton(frame, text="Play Warmup", font=("default_font", parent.font_size), fg_color=parent.fg_color, command=self.on_warmup_button_press)
+        self.warmup_button = ctk.CTkButton(frame, text="Play Warmup", font=("default_font", parent.font_size), fg_color=parent.fg_color, hover_color=parent.hover_color, command=self.on_warmup_button_press)
         self.warmup_button.grid(row=0, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
         self.warmup_test_1 = ctk.CTkLabel(frame, text='Test 1', text_color='gray', font=("default_font", parent.font_size))
@@ -297,17 +310,41 @@ class Left_Frame(ctk.CTkFrame):
         frame.grid_rowconfigure(0, weight=1)
         frame.grid_rowconfigure(1, weight=1)
 
-        self.speaker_projected_label = ctk.CTkLabel(frame, text='Selection Made:', font=("default_font", parent.font_size))
+        self.speaker_projected_label = ctk.CTkLabel(frame, text='Speaker Projecting:', font=("default_font", parent.font_size))
         self.speaker_projected_label.grid(row=0, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
         self.speaker_projected_display = ctk.CTkLabel(frame, text='None', font=("default_font", parent.font_size))
         self.speaker_projected_display.grid(row=0, column=1, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
-        self.selection_made_label = ctk.CTkLabel(frame, text='Selection Made:', font=("default_font", parent.font_size))
+        self.selection_made_label = ctk.CTkLabel(frame, text='Speaker Selected:', font=("default_font", parent.font_size))
         self.selection_made_label.grid(row=1, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
         self.selection_made_display = ctk.CTkLabel(frame, text='None',font=("default_font", parent.font_size))
         self.selection_made_display.grid(row=1, column=1, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
     # ACTION FUNCTIONS ---------------------------------------------
+    def reset_tdt_hardware(self):
+        self.parent.circuit = TDT_Circuit()
+
+        if self.parent.circuit.circuit_state:
+            connection_status_TDT = 'TDT Hardware: Connected'
+            text_color_TDT = '#2B881A'
+            self.tdt_status.configure(text=connection_status_TDT, text_color=text_color_TDT)
+        else:
+            connection_status_TDT = 'TDT Hardware: Not Connected'
+            text_color_TDT = '#BD2E2E'
+            self.tdt_status.configure(text=connection_status_TDT, text_color=text_color_TDT)
+
+    def reset_headset_hardware(self):
+        self.parent.headset = VR_Headset_Hardware()
+
+        if self.parent.headset.headset_state:
+            connection_status_VR = 'VR Headset: Connected'
+            text_color_VR = '#2B881A'
+            self.vr_status.configure(text=connection_status_VR, text_color=text_color_VR)
+        else:
+            connection_status_VR = 'VR Headset: Not Connected'
+            text_color_VR = '#BD2E2E'
+            self.vr_status.configure(text=connection_status_VR, text_color=text_color_VR)
+
     def on_experiment_load(self):
         selected_value = self.option_var_exp.get()
 
@@ -367,10 +404,10 @@ class Left_Frame(ctk.CTkFrame):
 
     def on_warmup_button_press(self):
 
-        task_thread = threading.Thread(target=self.trigger_audio_samples)
+        task_thread = threading.Thread(target=self.trigger_warmup_audio_samples)
         task_thread.start()
 
-    def trigger_audio_samples(self):
+    def trigger_warmup_audio_samples(self):
 
         for i in range(5):
             # Dynamically access the test display widget
@@ -385,6 +422,10 @@ class Left_Frame(ctk.CTkFrame):
             # print(f'Playing: {sample.name}')
             time.sleep(1)
 
+            # Logic to Trigger Audio Sample out of TDT # todo logic to Trigger Audio Sample out of TDT
+
+            self.parent.circuit.trigger_audio_sample(sample, channel)
+
             # Wait for VR Response
             vr_input = headset_manager.get_vr_input()
 
@@ -398,7 +439,7 @@ class Left_Frame(ctk.CTkFrame):
                 test_widget.configure(text_color='#BD2E2E')
 
 
-        self.after(0, lambda: self.warmup_button.configure(fg_color='#578CD5'))  # Replace with original color
+        self.after(0, lambda: self.warmup_button.configure(fg_color='#578CD5', hover_color=self.parent.hover_color))  # Replace with original color
 
 
 
