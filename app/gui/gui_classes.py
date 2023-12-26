@@ -10,12 +10,10 @@ import warnings
 
 
 import circuit_data
-import headset_manager
 from circuit_manager import TDT_Circuit
 from headset_manager import VR_Headset_Hardware
 from utils_exp import CSVFile
 from utils_exp import time_class
-
 
 
 
@@ -487,7 +485,7 @@ class Left_Frame(ctk.CTkFrame):
             self.parent.circuit.trigger_audio_sample(sample, channel)
 
             # Wait for VR Response
-            vr_input = headset_manager.get_vr_input()
+            vr_input = self.parent.headset.get_vr_input()
 
 
             if vr_input:  # todo change logic when a number equals channel
