@@ -521,6 +521,7 @@ class Left_Frame(ctk.CTkFrame):
                               command=message_popup.destroy)
         ok_button.pack(pady=10)
 
+    # EXPERIMENT FUNCTIONS ---------------------------------------------
     def on_start_button_press(self):
 
         # Error Handling
@@ -556,6 +557,9 @@ class Left_Frame(ctk.CTkFrame):
     def update_experiment_speaker_proj_display(self, value):
         self.speaker_projected_display.configure(text=value)
 
+    def update_experiment_speaker_selected_display(self, value):
+        self.selection_made_display.configure(text=value)
+
     def update_experiment_total_time_display(self):
         if self.parent.experiment_started:
             time = self.experiment_total_time_object.stats()
@@ -590,9 +594,9 @@ class Left_Frame(ctk.CTkFrame):
             # time.sleep(audio_sample.sample_length)
             self.parent.circuit.trigger_audio_sample(audio_sample, channel)
 
-
             # Get VR Response todo: get vr response
             speaker_selected = 0
+            # self.update_experiment_speaker_selected_display(speaker_selected)
             reaction_time = reaction_time.reaction_time()
             num_selections = 0
 
@@ -619,6 +623,7 @@ class Left_Frame(ctk.CTkFrame):
     def end_experiment_procedure(self):
         self.start_button.configure(text='Start Experiment', fg_color="#2B881A", hover_color='#389327', image=self.parent.start_icon)
         self.parent.experiment_started = False
+
 
 
 
