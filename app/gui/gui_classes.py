@@ -11,8 +11,6 @@ import warnings
 
 import circuit_data
 import headset_manager
-import circuit_manager
-from circuit_data import Warmup
 from circuit_manager import TDT_Circuit
 from headset_manager import VR_Headset_Hardware
 from utils_exp import CSVFile
@@ -579,7 +577,7 @@ class Left_Frame(ctk.CTkFrame):
 
         for iteration, (audio_sample, channel) in enumerate(zip(self.audio_samples_list, self.channel_list)):
             if self.parent.experiment_started == False:
-                continue
+                break
             self.update_experiment_stim_number_display(iteration+1)
             self.update_experiment_speaker_proj_display(channel)
             if iteration%5 == 0:
@@ -591,8 +589,6 @@ class Left_Frame(ctk.CTkFrame):
             # Trigger Audio Playing:
             # time.sleep(audio_sample.sample_length)
             self.parent.circuit.trigger_audio_sample(audio_sample, channel)
-
-
 
 
             # Get VR Response todo: get vr response
@@ -618,8 +614,6 @@ class Left_Frame(ctk.CTkFrame):
         self.option_var_exp.set('Select an Experiment')
         self.parent.experiment_loaded = False
         self.console_frame.reset_console_box()
-        self.parent.experiment_started = False
-        self.parent.circuit.stop_audio()
         self.end_experiment_procedure()
 
     def end_experiment_procedure(self):
