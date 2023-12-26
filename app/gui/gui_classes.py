@@ -50,6 +50,8 @@ class App(ctk.CTk):
         # Widgets ---------------------------------------------------------------
         self.circuit = TDT_Circuit()
         self.headset = VR_Headset_Hardware()
+        self.experiment_loaded = False
+        self.experiment_started = False
 
         self.right_frame = Right_Frame(self)
         self.left_frame = Left_Frame(self, self.right_frame)
@@ -95,10 +97,24 @@ class Right_Frame(ctk.CTkFrame):
         for i in range(21):
             frame.grid_rowconfigure(i, weight=0)
 
-    def update_console_box(self, new_data):
+    def update_console_box(self, new_data, experiment, **kwargs):
+        text_color = kwargs.get('text_color', 'black')
+        number = kwargs.get('number', None)
+        bg_color = kwargs.get('bg_color', None)
+
+        self.main_info_label.configure(text=f"Sample Audio Order: Experiment {experiment}")
         for i, data in enumerate(new_data):
-            if i < len(self.stim_labels):
-                self.stim_labels[i].configure(text=f"Stim {i+1}: {str(data).title()}")
+            if i+1 == number:
+                self.stim_labels[i].configure(text=f"Stim {number}: {str(data).title()}", text_color=text_color, bg_color='#B8B9B8')
+            elif bg_color is not None:
+                self.stim_labels[i].configure(text=f"Stim {i + 1}: {str(data).title()}", text_color='black', bg_color=bg_color)
+            else: self.stim_labels[i].configure(text=f"Stim {i+1}: {str(data).title()}", text_color='black')
+
+    def reset_console_box(self):
+        self.main_info_label.configure(text="Sample Audio Order:")
+        for i, label in enumerate(self.stim_labels):
+            label.configure(text=f"Stim {i+1}:", text_color='black', bg_color='#CFCFCF')
+
 
 class Left_Frame(ctk.CTkFrame):
     def __init__(self, parent, console_frame):
@@ -228,6 +244,7 @@ class Left_Frame(ctk.CTkFrame):
         self.dropdown_exp = ctk.CTkOptionMenu(frame, variable=self.option_var_exp, values=dropdown_values_exp,font=("default_font", parent.font_size), fg_color="#0952AA", dropdown_hover_color='#0F5BB6')
         self.dropdown_exp.grid(row=0, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
+
         # Load Experiment Button
         self.experiment_button = ctk.CTkButton(frame, text='Load Experiment', font=("default_font", parent.font_size), fg_color=parent.fg_color, command=self.on_experiment_load)
         self.experiment_button.grid(row=1, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
@@ -262,9 +279,9 @@ class Left_Frame(ctk.CTkFrame):
         frame.grid_rowconfigure(1, weight=1)  # Row for the load button
         frame.grid_columnconfigure(0, weight=1)  # Single column
 
-        self.start_button = ctk.CTkButton(frame, text='Start', font=("default_font", parent.font_size), fg_color="#2B881A", hover_color='#389327')
+        self.start_button = ctk.CTkButton(frame, text='Start Experiment', font=("default_font", parent.font_size), fg_color="#2B881A", hover_color='#389327', command=self.on_start_button_press)
         self.start_button.grid(row=0, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
-        self.end_button = ctk.CTkButton(frame, text='End', font=("default_font", parent.font_size), fg_color="#BD2E2E", hover_color='#C74343')
+        self.end_button = ctk.CTkButton(frame, text='End Experiment', font=("default_font", parent.font_size), fg_color="#BD2E2E", hover_color='#C74343', command=self.on_end_button_press)
         self.end_button.grid(row=1, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
     def pause_frames(self, parent, frame):
@@ -295,7 +312,7 @@ class Left_Frame(ctk.CTkFrame):
 
         self.current_stimulus_label = ctk.CTkLabel(frame, text='Current Simulus #:',font=("default_font", parent.font_size))
         self.current_stimulus_label.grid(row=0, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
-        self.current_stimulus_display = ctk.CTkLabel(frame, text='0',font=("default_font", parent.font_size))
+        self.current_stimulus_display = ctk.CTkLabel(frame, text='None',font=("default_font", parent.font_size))
         self.current_stimulus_display.grid(row=0, column=1, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
         self.total_time_label = ctk.CTkLabel(frame, text='Total Time:', font=("default_font", parent.font_size))
@@ -351,12 +368,14 @@ class Left_Frame(ctk.CTkFrame):
         if selected_value != 'Select an Experiment':
             selected_value = selected_value.split(' ')[1]
             self.sample_names_list = circuit_data.load_audio_names(selected_value)
-            self.console_frame.update_console_box(self.sample_names_list)
+            self.console_frame.update_console_box(self.sample_names_list, experiment=selected_value)
 
             # Show loading popup and start loading in a separate thread
             self.manage_loading_audio_popup(show=True)
             load_thread = threading.Thread(target=self.load_audio_samples, args=(selected_value,))
             load_thread.start()
+            self.parent.experiment_loaded = True
+            self.loaded_experiment_name = self.option_var_exp.get()
 
     def manage_loading_audio_popup(self, show=False):
         if show:
@@ -392,6 +411,7 @@ class Left_Frame(ctk.CTkFrame):
 
     def load_audio_samples(self, experiment_id):
         self.audio_samples_list = circuit_data.load_audio_samples(experiment_id)
+        self.channel_list = circuit_data.load_channel_numbers(experiment_id)
 
         # Call the function to close the loading pop-up in the main thread
         self.after(0, self.manage_loading_audio_popup)
@@ -441,14 +461,84 @@ class Left_Frame(ctk.CTkFrame):
 
         self.after(0, lambda: self.warmup_button.configure(fg_color='#578CD5', hover_color=self.parent.hover_color))  # Replace with original color
 
+    def warning_popup_general(self, message):
+        message_popup = tk.Toplevel(self)
+        message_popup.title("Message")
+        window_width = 400
+        window_height = 150
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        center_x = int((screen_width / 2) - (window_width / 2))
+        center_y = int((screen_height / 2) - (window_height / 2))
+        message_popup.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
+
+        # Display the message
+        tk.Label(message_popup, text=message, font=("default_font", 20)).pack(pady=20)
+
+        # OK button to close the pop-up
+        ok_button = tk.Button(message_popup, text="OK", background="#D3D3D3", padx=10, pady=10,
+                              command=message_popup.destroy)
+        ok_button.pack(pady=10)
+
+    def on_start_button_press(self):
+
+        # Error Handling
+        if self.option_var_exp.get() == 'Select an Experiment':
+            self.warning_popup_general(message='Need to select an Experiment')
+            return
+        if self.parent.experiment_loaded == False:
+            self.warning_popup_general(message='No Experiment Loaded')
+            return
+        if self.option_var_exp.get() != self.loaded_experiment_name:
+            self.warning_popup_general(message='Loaded Experiment doesnt\nmatch Selected Experiment')
+            return
+        if self.parent.experiment_started:
+            return
+
+        else:
+            task_thread = threading.Thread(target=self.start_experiment_procedure)
+            task_thread.start()
+
+    def update_experiment_stim_number_display(self, value):
+        self.current_stimulus_display.configure(text=value)
+
+    def update_experiment_speaker_proj_display(self, value):
+        self.speaker_projected_display.configure(text=value)
+
+    def start_experiment_procedure(self):
+        print('Starting Experiment')
+        self.parent.experiment_started = True
+        selected_value = self.option_var_exp.get().split(' ')[1]
+        self.sample_names_list = circuit_data.load_audio_names(selected_value)
 
 
+        for iteration, (audio_sample, channel) in enumerate(zip(self.audio_samples_list, self.channel_list)):
 
+            if self.parent.experiment_started == False:
+                continue
+            self.update_experiment_stim_number_display(iteration+1)
+            self.update_experiment_speaker_proj_display(channel)
+            if iteration%5 == 0:
+                print(f'{int((iteration/5)+1)}: {audio_sample.name.split("_")[0].title()}')
+                self.console_frame.update_console_box(self.sample_names_list, experiment=selected_value, text_color='#2B881A', number=int((iteration/5)+1))
 
+            time.sleep(audio_sample.sample_length)
 
+        self.console_frame.update_console_box(self.sample_names_list, experiment=selected_value)
+        self.parent.experiment_started = False
+        self.end_experiment_procedure()
 
+    def on_end_button_press(self):
+        print('Experiment Ended')
+        self.update_experiment_stim_number_display('None')
+        self.update_experiment_speaker_proj_display('None')
+        self.console_frame.reset_console_box()
+        self.parent.experiment_started = False
 
+        self.end_experiment_procedure()
 
+    def end_experiment_procedure(self):
+        pass
 
 
 if __name__ == "__main__":
