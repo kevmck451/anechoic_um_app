@@ -27,8 +27,6 @@ class TDT_Circuit:
         #     pass
 
 
-
-
     def trigger_audio_sample(self, audio_sample, channel):
         sd.play(audio_sample.data, audio_sample.sample_rate)
         sd.wait()

@@ -194,6 +194,7 @@ class Left_Frame(ctk.CTkFrame):
 
 
         self.hardware_connection_frames(parent, top_left_frame)
+        self.check_hardware_status()
         self.select_experiment(parent, top_right_frame)
 
         self.warmup_frames(parent, middle_frame_1)
@@ -390,6 +391,28 @@ class Left_Frame(ctk.CTkFrame):
             text_color_VR = '#BD2E2E'
             self.vr_status.configure(text=connection_status_VR, text_color=text_color_VR)
 
+    def check_hardware_status(self):
+
+        if self.parent.circuit.circuit_state:
+            connection_status_TDT = 'TDT Hardware: Connected'
+            text_color_TDT = '#2B881A'
+            self.tdt_status.configure(text=connection_status_TDT, text_color=text_color_TDT)
+        else:
+            connection_status_TDT = 'TDT Hardware: Not Connected'
+            text_color_TDT = '#BD2E2E'
+            self.tdt_status.configure(text=connection_status_TDT, text_color=text_color_TDT)
+
+        if self.parent.headset.headset_state:
+            connection_status_VR = 'VR Headset: Connected'
+            text_color_VR = '#2B881A'
+            self.vr_status.configure(text=connection_status_VR, text_color=text_color_VR)
+        else:
+            connection_status_VR = 'VR Headset: Not Connected'
+            text_color_VR = '#BD2E2E'
+            self.vr_status.configure(text=connection_status_VR, text_color=text_color_VR)
+
+        self.parent.after(500, self.check_hardware_status)
+
     def on_experiment_load(self):
         selected_value = self.option_var_exp.get()
 
@@ -443,12 +466,6 @@ class Left_Frame(ctk.CTkFrame):
 
         # Call the function to close the loading pop-up in the main thread
         self.after(0, self.manage_loading_audio_popup)
-
-    def on_VR_reset(self):
-        pass
-
-    def on_TDT_reset(self):
-        pass
 
     def on_warmup_button_press(self):
 
