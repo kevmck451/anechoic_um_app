@@ -2,6 +2,7 @@ from audio_abstract import Audio_Abstract
 from utils import CSVFile
 import numpy as np
 import time
+import random
 
 project_base_path = '/Users/KevMcK/Dropbox/2 Work/4 Anechoic Chamber/anechoic_um_app'
 
@@ -112,7 +113,7 @@ def load_warmup_data():
         audio_sample_buffer.append(audio)
 
     channel_buffer = list(np.random.choice(range(1,10), size=5, replace=False))
-    # print(channel_buffer)
+    random.shuffle(audio_sample_buffer)
 
     return audio_sample_buffer, channel_buffer
 

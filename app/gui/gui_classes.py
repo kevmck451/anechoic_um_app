@@ -4,6 +4,10 @@ import customtkinter as ctk
 from PIL import Image, ImageTk
 import threading
 import time
+from tkinter import PhotoImage
+import numpy as np
+import warnings
+
 
 import circuit_data
 import headset_manager
@@ -11,6 +15,9 @@ import circuit_manager
 from circuit_data import Warmup
 from circuit_manager import TDT_Circuit
 from headset_manager import VR_Headset_Hardware
+from utils_exp import CSVFile
+from utils_exp import time_class
+
 
 
 
@@ -52,6 +59,12 @@ class App(ctk.CTk):
         self.headset = VR_Headset_Hardware()
         self.experiment_loaded = False
         self.experiment_started = False
+        self.playing_icon = PhotoImage(file='../docs/playing icon s.png')
+        self.start_icon = PhotoImage(file='../docs/start icon s.png')
+        self.stop_icon = PhotoImage(file='../docs/stop icon s.png')
+        self.pause_icon = PhotoImage(file='../docs/pause icon s.png')
+        self.load_icon = PhotoImage(file='../docs/load icon s.png')
+        warnings.filterwarnings('ignore', category=UserWarning, module='customtkinter.*')
 
         self.right_frame = Right_Frame(self)
         self.left_frame = Left_Frame(self, self.right_frame)
@@ -241,12 +254,14 @@ class Left_Frame(ctk.CTkFrame):
         # Dropdown Box
         dropdown_values_exp = ['Select an Experiment'] + [f'Experiment {x}' for x in range(1, 21)]
         self.option_var_exp = tk.StringVar(value=dropdown_values_exp[0])  # Set initial value to the prompt text
-        self.dropdown_exp = ctk.CTkOptionMenu(frame, variable=self.option_var_exp, values=dropdown_values_exp,font=("default_font", parent.font_size), fg_color="#0952AA", dropdown_hover_color='#0F5BB6')
+        self.dropdown_exp = ctk.CTkOptionMenu(frame, variable=self.option_var_exp, values=dropdown_values_exp,
+                                              font=("default_font", parent.font_size), fg_color="#0952AA", dropdown_hover_color='#0F5BB6')
         self.dropdown_exp.grid(row=0, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
 
         # Load Experiment Button
-        self.experiment_button = ctk.CTkButton(frame, text='Load Experiment', font=("default_font", parent.font_size), fg_color=parent.fg_color, command=self.on_experiment_load)
+        self.experiment_button = ctk.CTkButton(frame, text='Load Experiment', font=("default_font", parent.font_size),
+                                               fg_color=parent.fg_color, command=self.on_experiment_load, image=self.parent.load_icon)
         self.experiment_button.grid(row=1, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
     def warmup_frames(self, parent, frame):
@@ -259,7 +274,10 @@ class Left_Frame(ctk.CTkFrame):
         frame.grid_columnconfigure(0, weight=1)  # Single column
 
         # Sub Sub Frame of Warm Up ----------------------------------------
-        self.warmup_button = ctk.CTkButton(frame, text="Play Warmup", font=("default_font", parent.font_size), fg_color=parent.fg_color, hover_color=parent.hover_color, command=self.on_warmup_button_press)
+        self.warmup_button = ctk.CTkButton(frame, text="Play Warmup",
+                                           font=("default_font", parent.font_size), fg_color=parent.fg_color,
+                                           hover_color=parent.hover_color, command=self.on_warmup_button_press,
+                                           image=self.parent.start_icon)
         self.warmup_button.grid(row=0, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
         self.warmup_test_1 = ctk.CTkLabel(frame, text='Test 1', text_color='gray', font=("default_font", parent.font_size))
@@ -279,18 +297,24 @@ class Left_Frame(ctk.CTkFrame):
         frame.grid_rowconfigure(1, weight=1)  # Row for the load button
         frame.grid_columnconfigure(0, weight=1)  # Single column
 
-        self.start_button = ctk.CTkButton(frame, text='Start Experiment', font=("default_font", parent.font_size), fg_color="#2B881A", hover_color='#389327', command=self.on_start_button_press)
+        self.start_button = ctk.CTkButton(frame, text='Start Experiment', font=("default_font", parent.font_size),
+                                          fg_color="#2B881A", hover_color='#389327', command=self.on_start_button_press,
+                                          image=self.parent.start_icon)
         self.start_button.grid(row=0, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
-        self.end_button = ctk.CTkButton(frame, text='End Experiment', font=("default_font", parent.font_size), fg_color="#BD2E2E", hover_color='#C74343', command=self.on_end_button_press)
+        self.end_button = ctk.CTkButton(frame, text='End Experiment', font=("default_font", parent.font_size),
+                                        fg_color="#BD2E2E", hover_color='#C74343', command=self.on_end_button_press,
+                                        image=self.parent.stop_icon)
         self.end_button.grid(row=1, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
     def pause_frames(self, parent, frame):
         frame.grid_rowconfigure(0, weight=1)  # Row for the load button
         frame.grid_rowconfigure(1, weight=1)  # Row for the load button
         frame.grid_rowconfigure(2, weight=1)  # Row for the load button
+        frame.grid_rowconfigure(3, weight=1)  # Row for the load button
         frame.grid_columnconfigure(0, weight=1)  # Single column
 
-        self.pause_button = ctk.CTkButton(frame, text='Pause', font=("default_font", parent.font_size), fg_color="#8F8F8F", hover_color='#9E9E9E')
+        self.pause_button = ctk.CTkButton(frame, text='Pause', font=("default_font", parent.font_size),
+                                          fg_color="#8F8F8F", hover_color='#9E9E9E', image=self.parent.pause_icon)
         self.pause_button.grid(row=0, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
         # Stimulus Dropdown Box
@@ -300,8 +324,16 @@ class Left_Frame(ctk.CTkFrame):
                                                font=("default_font", parent.font_size), fg_color="#0952AA", dropdown_hover_color='#0F5BB6')
         self.dropdown_stim.grid(row=1, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
-        self.load_stim_button = ctk.CTkButton(frame, text='Load', font=("default_font", parent.font_size), fg_color=parent.fg_color)
+        self.load_stim_button = ctk.CTkButton(frame, text='Load', font=("default_font", parent.font_size), fg_color=parent.fg_color, image=self.parent.load_icon)
         self.load_stim_button.grid(row=2, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
+
+        # Stimulus Dropdown Box
+        dropdown_values_time_bw_samp = [f'Time bw Samples: {x} sec' for x in np.arange(0.5, 4.5, 0.5)]
+        self.option_var_time_bw_samp = tk.StringVar(value=dropdown_values_time_bw_samp[3])  # Set initial value to the prompt text
+        self.dropdown_time_bw_samp = ctk.CTkOptionMenu(frame, variable=self.option_var_time_bw_samp, values=dropdown_values_time_bw_samp,
+                                               font=("default_font", parent.font_size), fg_color="#0952AA",
+                                               dropdown_hover_color='#0F5BB6')
+        self.dropdown_time_bw_samp.grid(row=3, column=0, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
     def experiment_metadata_frames_1(self, parent, frame):
 
@@ -424,6 +456,15 @@ class Left_Frame(ctk.CTkFrame):
 
     def on_warmup_button_press(self):
 
+        if self.parent.experiment_started:
+            return
+        if self.parent.circuit.circuit_state == False:
+            self.warning_popup_general(message='TDT Hardware Not Connected')
+            return
+        # if self.parent.headset.headset_state == False:
+        #     self.warning_popup_general(message='VR Headset Not Connected')
+        #     return
+
         task_thread = threading.Thread(target=self.trigger_warmup_audio_samples)
         task_thread.start()
 
@@ -433,33 +474,35 @@ class Left_Frame(ctk.CTkFrame):
             # Dynamically access the test display widget
             test_widget_name = f'warmup_test_{i + 1}'  # Construct the name string
             test_widget = getattr(self, test_widget_name)
-            test_widget.configure(text_color='gray')
+            test_widget.configure(text_color='gray', bg_color='#DBDBDB')
 
         test_audio_buffer, test_channel_buffer = circuit_data.load_warmup_data()
 
         for i, (sample, channel) in enumerate(zip(test_audio_buffer, test_channel_buffer)):
-            self.warmup_button.configure(fg_color="#2B881A", hover_color="#2B881A")  # Example gray color
-            # print(f'Playing: {sample.name}')
-            time.sleep(1)
+            self.warmup_button.configure(fg_color="#2B881A", hover_color="#2B881A", image=self.parent.playing_icon)  # Example gray color
+            # Dynamically access the test display widget
+            test_widget_name = f'warmup_test_{i + 1}'  # Construct the name string
+            test_widget = getattr(self, test_widget_name)
+            test_widget.configure(bg_color='#B8B9B8')
 
             # Logic to Trigger Audio Sample out of TDT # todo logic to Trigger Audio Sample out of TDT
-
             self.parent.circuit.trigger_audio_sample(sample, channel)
 
             # Wait for VR Response
             vr_input = headset_manager.get_vr_input()
 
-            # Dynamically access the test display widget
-            test_widget_name = f'warmup_test_{i + 1}'  # Construct the name string
-            test_widget = getattr(self, test_widget_name)
 
             if vr_input:  # todo change logic when a number equals channel
                 test_widget.configure(text_color='#2B881A')  # update test display color to green
             else:
                 test_widget.configure(text_color='#BD2E2E')
 
+            # Time between Samples
+            time_to_sleep = self.option_var_time_bw_samp.get().split(':')[1].strip().split(' ')[0]
+            time.sleep(float(time_to_sleep))
 
-        self.after(0, lambda: self.warmup_button.configure(fg_color='#578CD5', hover_color=self.parent.hover_color))  # Replace with original color
+
+        self.after(0, lambda: self.warmup_button.configure(fg_color='#578CD5', hover_color=self.parent.hover_color, image=self.parent.start_icon))  # Replace with original color
 
     def warning_popup_general(self, message):
         message_popup = tk.Toplevel(self)
@@ -494,10 +537,20 @@ class Left_Frame(ctk.CTkFrame):
             return
         if self.parent.experiment_started:
             return
+        if self.parent.circuit.circuit_state == False:
+            self.warning_popup_general(message='TDT Hardware Not Connected')
+            return
+        # if self.parent.headset.headset_state == False:
+        #     self.warning_popup_general(message='VR Headset Not Connected')
+        #     return
 
-        else:
-            task_thread = threading.Thread(target=self.start_experiment_procedure)
-            task_thread.start()
+        timer_thread = threading.Thread(target=self.experiment_timer)
+        timer_thread.start()
+        task_thread = threading.Thread(target=self.start_experiment_procedure)
+        task_thread.start()
+
+    def experiment_timer(self):
+        self.experiment_total_time_object = time_class('Experiment Total Time')
 
     def update_experiment_stim_number_display(self, value):
         self.current_stimulus_display.configure(text=value)
@@ -505,40 +558,74 @@ class Left_Frame(ctk.CTkFrame):
     def update_experiment_speaker_proj_display(self, value):
         self.speaker_projected_display.configure(text=value)
 
+    def update_experiment_total_time_display(self):
+        if self.parent.experiment_started:
+            time = self.experiment_total_time_object.stats()
+            self.total_time_display.configure(text=time)
+            self.parent.after(500, self.update_experiment_total_time_display)
+
     def start_experiment_procedure(self):
-        print('Starting Experiment')
+        # print('Starting Experiment')
         self.parent.experiment_started = True
+        self.start_button.configure(image=self.parent.playing_icon)
+        self.update_experiment_total_time_display()
         selected_value = self.option_var_exp.get().split(' ')[1]
+        self.output_file = CSVFile(selected_value)
+
+        self.parent.experiment_started = True
+        self.start_button.configure(text='Experiment In Progress', fg_color="#2B881A", hover_color="#2B881A")
+
         self.sample_names_list = circuit_data.load_audio_names(selected_value)
 
-
         for iteration, (audio_sample, channel) in enumerate(zip(self.audio_samples_list, self.channel_list)):
-
             if self.parent.experiment_started == False:
                 continue
             self.update_experiment_stim_number_display(iteration+1)
             self.update_experiment_speaker_proj_display(channel)
             if iteration%5 == 0:
-                print(f'{int((iteration/5)+1)}: {audio_sample.name.split("_")[0].title()}')
+                # print(f'{int((iteration/5)+1)}: {audio_sample.name.split("_")[0].title()}')
                 self.console_frame.update_console_box(self.sample_names_list, experiment=selected_value, text_color='#2B881A', number=int((iteration/5)+1))
 
-            time.sleep(audio_sample.sample_length)
+            reaction_time = time_class('Reaction Time')
+
+            # Trigger Audio Playing:
+            # time.sleep(audio_sample.sample_length)
+            self.parent.circuit.trigger_audio_sample(audio_sample, channel)
+
+
+
+
+            # Get VR Response todo: get vr response
+            speaker_selected = 0
+            reaction_time = reaction_time.reaction_time()
+            num_selections = 0
+
+            self.output_file.write_row_at(iteration, [iteration+1, audio_sample.name, channel, speaker_selected, reaction_time, num_selections])
+
+            # Time between Samples
+            time_to_sleep = self.option_var_time_bw_samp.get().split(':')[1].strip().split(' ')[0]
+            time.sleep(float(time_to_sleep))
 
         self.console_frame.update_console_box(self.sample_names_list, experiment=selected_value)
-        self.parent.experiment_started = False
         self.end_experiment_procedure()
 
     def on_end_button_press(self):
         print('Experiment Ended')
+
+        self.total_time_display.configure(text='00:00')
         self.update_experiment_stim_number_display('None')
         self.update_experiment_speaker_proj_display('None')
+        self.option_var_exp.set('Select an Experiment')
+        self.parent.experiment_loaded = False
         self.console_frame.reset_console_box()
         self.parent.experiment_started = False
-
+        self.parent.circuit.stop_audio()
         self.end_experiment_procedure()
 
     def end_experiment_procedure(self):
-        pass
+        self.start_button.configure(text='Start Experiment', fg_color="#2B881A", hover_color='#389327', image=self.parent.start_icon)
+        self.parent.experiment_started = False
+
 
 
 if __name__ == "__main__":

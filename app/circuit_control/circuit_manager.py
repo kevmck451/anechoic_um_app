@@ -1,8 +1,7 @@
 # from tdt import DSPProject
 import numpy as np
+import sounddevice as sd
 
-
-stimulus_number = int()
 
 
 class TDT_Circuit:
@@ -25,8 +24,9 @@ class TDT_Circuit:
         # except DSPError as e:
         #     print ("Error: {}".format(e))
 
-
-
     def trigger_audio_sample(self, audio_sample, channel):
-        print('Playing Audio')
+        sd.play(audio_sample.data, audio_sample.sample_rate)
+        sd.wait()
 
+    def stop_audio(self):
+        sd.stop()
