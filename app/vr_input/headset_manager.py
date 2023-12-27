@@ -47,7 +47,6 @@ class VR_Headset_Hardware:
             input_thread = Thread(target=self.get_vr_input).start()
             check_input = Thread(target=self.check_if_input).start()
 
-
     def check_connection(self):
         print('check connection')
         if self.headset_state:
@@ -99,8 +98,6 @@ class VR_Headset_Hardware:
                 self.client_socket.close()
                 print("Connection closed.")
                 self.server_socket.close()
-
-
 
     def check_if_input(self):
         while True:

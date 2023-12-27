@@ -25,10 +25,6 @@ def server_example():
         # Don't forget to close each client socket when you're done with it
         client_socket.close()
 
-
-
-
-
 def start_server():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind(('0.0.0.0', 12345))
@@ -57,10 +53,6 @@ def start_server():
         client_socket.close()
         print("Connection closed.")
         server_socket.close()
-
-
-
-
 
 if __name__ == "__main__":
     start_server()
