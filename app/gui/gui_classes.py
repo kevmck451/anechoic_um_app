@@ -3,6 +3,7 @@ from tkinter import ttk
 import customtkinter as ctk
 from PIL import Image, ImageTk
 import threading
+from threading import Thread
 import time
 from tkinter import PhotoImage
 import numpy as np
@@ -194,15 +195,14 @@ class Left_Frame(ctk.CTkFrame):
 
 
         self.hardware_connection_frames(parent, top_left_frame)
-        self.check_hardware_status()
         self.select_experiment(parent, top_right_frame)
-
         self.warmup_frames(parent, middle_frame_1)
         self.start_stop_frames(parent, middle_frame_2)
         self.pause_frames(parent, middle_frame_3)
-
         self.experiment_metadata_frames_1(parent, bottom_left_frame)
         self.experiment_metadata_frames_2(parent, bottom_right_frame)
+        self.check_hardware_status()
+
 
     # FRAMES ---------------------------------------------
     def hardware_connection_frames(self, parent, frame):
@@ -392,6 +392,8 @@ class Left_Frame(ctk.CTkFrame):
             self.vr_status.configure(text=connection_status_VR, text_color=text_color_VR)
 
     def check_hardware_status(self):
+        if self.parent.headset.first_connect:
+            Thread(target=self.parent.headset.check_connection).start()
 
         if self.parent.circuit.circuit_state:
             connection_status_TDT = 'TDT Hardware: Connected'
@@ -411,7 +413,7 @@ class Left_Frame(ctk.CTkFrame):
             text_color_VR = '#BD2E2E'
             self.vr_status.configure(text=connection_status_VR, text_color=text_color_VR)
 
-        self.parent.after(500, self.check_hardware_status)
+        self.parent.after(3000, self.check_hardware_status)
 
     def on_experiment_load(self):
         selected_value = self.option_var_exp.get()
@@ -502,13 +504,15 @@ class Left_Frame(ctk.CTkFrame):
             self.parent.circuit.trigger_audio_sample(sample, channel)
 
             # Wait for VR Response
-            vr_input = self.parent.headset.get_vr_input()
-
+            vr_thread = Thread(target=self.parent.headset.get_vr_input)
+            vr_thread.start()
+            vr_input = self.parent.headset.speaker_selected
 
             if vr_input:  # todo change logic when a number equals channel
                 test_widget.configure(text_color='#2B881A')  # update test display color to green
-            else:
+            elif not vr_input:
                 test_widget.configure(text_color='#BD2E2E')
+            else: test_widget.configure(text_color='gray')
 
             # Time between Samples
             time_to_sleep = self.option_var_time_bw_samp.get().split(':')[1].strip().split(' ')[0]
