@@ -1,6 +1,7 @@
 import numpy as np
 import socket
 from threading import Thread
+import time
 
 
 
@@ -17,6 +18,8 @@ class VR_Headset_Hardware:
         self.degree_error = 'None'
         self.headset_state = False
         self.first_connect = False
+        self.list_length = 0
+        self.state_changed = False
 
         self.server_thread = Thread(target=self.start_server)
         self.server_thread.start()
@@ -40,51 +43,72 @@ class VR_Headset_Hardware:
             # Send confirmation to client
             self.client_socket.sendall("Connection established".encode('utf-8'))
 
-    def check_connection(self):
-        try:
-            self.client_socket.sendall("ping".encode())
+            # self.check_connection()
+            input_thread = Thread(target=self.get_vr_input).start()
+            check_input = Thread(target=self.check_if_input).start()
 
-            # Wait for a pong response
-            response = self.client_socket.recv(1024).decode()
-            if response == "pong":
-                self.headset_state = True
-            else:
+
+    def check_connection(self):
+        print('check connection')
+        if self.headset_state:
+            try:
+                self.client_socket.sendall("ping".encode())
+
+                # Set a timeout for the response
+                self.client_socket.settimeout(0.1)  # Timeout in seconds
+
+                # Wait for a pong response
+                response = self.client_socket.recv(1024).decode()
+                if response == "pong":
+                    # print('pong')
+                    self.headset_state = True
+                else:
+                    print('no pong')
+                    self.headset_state = False
+
+            except Exception as e:
+                print("Exception:", e)
                 self.headset_state = False
 
-        except Exception as e:
-            self.headset_state = False
-            # Handle other exceptions like timeout, connection reset, etc.
+            finally:
+                # Reset timeout to None or original value
+                self.client_socket.settimeout(None)
 
     def get_vr_input(self):
+
         # random = np.random.choice([True, False])
         # return random
+        if self.headset_state:
+            try:
+                while True:
+                    # Expecting: speaker selected, degree error
+                    vr_input = self.client_socket.recv(1024)
+                    if not vr_input:
+                        continue
+                    self.vr_input = vr_input.decode('utf-8')
+                    print("Received:", self.vr_input)
+                    self.all_input_list.append(self.vr_input)
+                    self.speaker_selected = str(self.vr_input)
+                    # self.speaker_selected = str(self.vr_input).split(',')[0].strip()
+                    # self.degree_error = str(self.vr_input).split(',')[1].strip()
 
-        try:
-            while True:
-                # Expecting: speaker selected, degree error
-                self.vr_input = self.client_socket.recv(1024)
-                print(self.vr_input)
-                self.all_input_list.append(self.vr_input)
+            except Exception as e:
+                print(f"An error occurred: {e}")
 
-                self.speaker_selected = str(self.vr_input)
-                # self.speaker_selected = str(self.vr_input).split(',')[0].strip()
-                # self.degree_error = str(self.vr_input).split(',')[1].strip()
-
-                print("Received:", self.vr_input.decode('utf-8'))
-                # Process data here
-
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            self.headset_state = False
-
-        finally:
-            self.client_socket.close()
-            print("Connection closed.")
-            self.server_socket.close()
-            self.headset_state = False
+            finally:
+                self.client_socket.close()
+                print("Connection closed.")
+                self.server_socket.close()
 
 
 
+    def check_if_input(self):
+        while True:
+            if self.headset_state:
+                current_list_length = len(self.all_input_list)
+                if current_list_length > self.list_length:
+                    self.list_length = current_list_length
+                    self.state_changed = True
 
 
 

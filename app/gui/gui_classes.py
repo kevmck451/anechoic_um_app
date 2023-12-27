@@ -202,7 +202,7 @@ class Left_Frame(ctk.CTkFrame):
         self.experiment_metadata_frames_1(parent, bottom_left_frame)
         self.experiment_metadata_frames_2(parent, bottom_right_frame)
         self.check_hardware_status()
-
+        self.update_experiment_speaker_selected_color()
 
     # FRAMES ---------------------------------------------
     def hardware_connection_frames(self, parent, frame):
@@ -366,7 +366,8 @@ class Left_Frame(ctk.CTkFrame):
         self.selection_made_display = ctk.CTkLabel(frame, text='None',font=("default_font", parent.font_size))
         self.selection_made_display.grid(row=1, column=1, padx=parent.x_pad_2, pady=parent.y_pad_2, sticky='nsew')
 
-    # ACTION FUNCTIONS ---------------------------------------------
+    # ACTION FUNCTIONS --------------------------------------------
+
     def reset_tdt_hardware(self):
         self.parent.circuit = TDT_Circuit()
 
@@ -392,8 +393,8 @@ class Left_Frame(ctk.CTkFrame):
             self.vr_status.configure(text=connection_status_VR, text_color=text_color_VR)
 
     def check_hardware_status(self):
-        if self.parent.headset.first_connect:
-            Thread(target=self.parent.headset.check_connection).start()
+        # if self.parent.headset.first_connect:
+        #     Thread(target=self.parent.headset.check_connection).start()
 
         if self.parent.circuit.circuit_state:
             connection_status_TDT = 'TDT Hardware: Connected'
@@ -504,8 +505,7 @@ class Left_Frame(ctk.CTkFrame):
             self.parent.circuit.trigger_audio_sample(sample, channel)
 
             # Wait for VR Response
-            vr_thread = Thread(target=self.parent.headset.get_vr_input)
-            vr_thread.start()
+
             vr_input = self.parent.headset.speaker_selected
 
             if vr_input:  # todo change logic when a number equals channel
@@ -517,7 +517,6 @@ class Left_Frame(ctk.CTkFrame):
             # Time between Samples
             time_to_sleep = self.option_var_time_bw_samp.get().split(':')[1].strip().split(' ')[0]
             time.sleep(float(time_to_sleep))
-
 
         self.after(0, lambda: self.warmup_button.configure(fg_color='#578CD5', hover_color=self.parent.hover_color, image=self.parent.start_icon))  # Replace with original color
 
@@ -576,8 +575,51 @@ class Left_Frame(ctk.CTkFrame):
     def update_experiment_speaker_proj_display(self, value):
         self.speaker_projected_display.configure(text=value)
 
-    def update_experiment_speaker_selected_display(self, value):
-        self.selection_made_display.configure(text=value)
+    def update_experiment_speaker_selected_color(self):
+        if (self.parent.headset.headset_state and
+                not self.parent.experiment_started and
+                self.parent.headset.state_changed):
+
+            self.selection_made_label.configure(bg_color='#B8B9B8')
+
+            # Schedule to change color back after 2000 milliseconds (2 seconds)
+            self.parent.after(250, lambda: self.selection_made_label.configure(bg_color='#DBDBDB'))
+
+            self.parent.headset.state_changed = False
+
+            # Schedule this function to run again after 10 milliseconds
+        self.parent.after(10, self.update_experiment_speaker_selected_color)
+
+    def update_experiment_speaker_selection(self):
+        if (self.parent.headset.headset_state and
+                not self.parent.experiment_started and
+                self.parent.headset.state_changed):
+
+            self.selection_made_label.configure(bg_color='#B8B9B8')
+
+            # Schedule to change color back after 2000 milliseconds (2 seconds)
+            self.parent.after(250, lambda: self.selection_made_label.configure(bg_color='#DBDBDB'))
+
+            self.parent.headset.state_changed = False
+
+            # Schedule this function to run again after 10 milliseconds
+        self.parent.after(10, self.update_experiment_speaker_selected_color)
+
+    def update_experiment_speaker_selected_display(self):
+        self.selection_made_display.configure(text=self.parent.headset.speaker_selected)
+        self.parent.after(10, self.update_experiment_speaker_selected_display)
+
+    def get_reaction_time_when_input(self):
+
+        reaction_time = time_class('Reaction Time')
+        self.num_selections = 1
+
+        if self.parent.headset.state_changed:
+            self.reaction_time = reaction_time.reaction_time()
+            self.num_selections += 1
+            self.parent.headset.state_changed = False
+
+        else: self.reaction_time = 'null'
 
     def update_experiment_total_time_display(self):
         if self.parent.experiment_started:
@@ -601,26 +643,23 @@ class Left_Frame(ctk.CTkFrame):
         for iteration, (audio_sample, channel) in enumerate(zip(self.audio_samples_list, self.channel_list)):
             if self.parent.experiment_started == False:
                 break
+            self.parent.headset.speaker_selected = 'None'
+            Thread(target=self.get_reaction_time_when_input).start()
+            self.update_experiment_speaker_selected_display()
             self.update_experiment_stim_number_display(iteration+1)
             self.update_experiment_speaker_proj_display(channel)
             if iteration%5 == 0:
                 # print(f'{int((iteration/5)+1)}: {audio_sample.name.split("_")[0].title()}')
                 self.console_frame.update_console_box(self.sample_names_list, experiment=selected_value, text_color='#2B881A', number=int((iteration/5)+1))
 
-            reaction_time = time_class('Reaction Time')
-
             # Trigger Audio Playing:
             # time.sleep(audio_sample.sample_length)
             self.parent.circuit.trigger_audio_sample(audio_sample, channel)
 
-            # Get VR Response todo: get vr response
-            speaker_selected = 0
-            # self.update_experiment_speaker_selected_display(speaker_selected)
-            reaction_time = reaction_time.reaction_time()
-            num_selections = 0
+            self.output_file.write_row_at(iteration, [iteration+1, audio_sample.name, channel,
+                                                      self.parent.headset.speaker_selected, self.reaction_time, self.num_selections])
 
-            self.output_file.write_row_at(iteration, [iteration+1, audio_sample.name, channel, speaker_selected, reaction_time, num_selections])
-
+            self.parent.headset.speaker_selected = 'None'
             # Time between Samples
             time_to_sleep = self.option_var_time_bw_samp.get().split(':')[1].strip().split(' ')[0]
             time.sleep(float(time_to_sleep))
