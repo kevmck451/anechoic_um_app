@@ -1,1 +1,0 @@
-audio_time_between_samples: 1.0

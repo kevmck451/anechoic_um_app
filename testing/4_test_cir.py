@@ -1,5 +1,5 @@
 from tdt import DSPProject
-from app.circuit_control.audio_abstract import Audio_Abstract
+from data_manager.audio_abstract import Audio_Abstract
 
 import numpy as np
 

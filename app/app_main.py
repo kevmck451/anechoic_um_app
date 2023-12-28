@@ -1,6 +1,7 @@
-# Main File for App
+# Main File for GUI_class
 
-from gui_classes import App
+from gui_class import GUI_class
 
 if __name__ == "__main__":
-    app = App()
+    view = GUI_class()
+    view.mainloop()

@@ -1,7 +1,5 @@
 import numpy as np
 
-import circuit_data
-
 
 class VR_Headset_Hardware:
     def __init__(self):

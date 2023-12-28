@@ -8,16 +8,15 @@ from tkinter import PhotoImage
 import numpy as np
 import warnings
 
-
-import circuit_data
-from circuit_manager import TDT_Circuit
-from headset_manager import VR_Headset_Hardware
+from data_manager import circuit_data
+from tdt_hardware.TDT_manager import TDT_Circuit
+from VR_manager import VR_Headset_Hardware
 from utils_exp import CSVFile
 from utils_exp import time_class
 
 
 
-class App(ctk.CTk):
+class GUI_class(ctk.CTk):
     def __init__(self):
         super().__init__()
 
@@ -72,10 +71,6 @@ class App(ctk.CTk):
         # Place the frames using grid
         self.left_frame.grid(row=0, column=0, sticky='nsew')  # Left frame in column 0
         self.right_frame.grid(row=0, column=1, sticky='nsew')  # Right frame in column 1
-
-
-        # Run ---------------------------------------------------------------------
-        self.mainloop()
 
 
 class Right_Frame(ctk.CTkFrame):
@@ -643,4 +638,4 @@ class Left_Frame(ctk.CTkFrame):
 
 
 if __name__ == "__main__":
-    App()
+    GUI_class()
