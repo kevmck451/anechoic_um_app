@@ -1,77 +1,87 @@
 
-from TDT_manager import TDT_Circuit
-from VR_manager import VR_Headset_Hardware
+from enum import Enum, auto
 
 
+class Controller:
+    def __init__(self, tdt_hardware, vr_hardware):
+        self.tdt_hardware = tdt_hardware
+        self.vr_hardware = vr_hardware
+        self.state = State.IDLE
+
+    def set_gui(self, gui):
+        self.gui = gui
+
+    def handle_event(self, event):
+        print(event)
+
+        # These are the gate keepers for whether or not to perform the action
+        if event == Event.TDT_CONNECT:
+            print(f'State: {self.state}')
 
 
-
-# Console:
-def update_console_box(frame, new_data, experiment, **kwargs):
-    text_color = kwargs.get('text_color', 'black')
-    number = kwargs.get('number', None)
-    bg_color = kwargs.get('bg_color', None)
-
-    frame.main_info_label.configure(text=f"Sample Audio Order: Experiment {experiment}")
-    for i, data in enumerate(new_data):
-        if i + 1 == number:
-            frame.stim_labels[i].configure(text=f"Stim {number}: {str(data).title()}", text_color=text_color,
-                                           bg_color='#B8B9B8')
-        elif bg_color is not None:
-            frame.stim_labels[i].configure(text=f"Stim {i + 1}: {str(data).title()}", text_color='black',
-                                           bg_color=bg_color)
-        else:
-            frame.stim_labels[i].configure(text=f"Stim {i + 1}: {str(data).title()}", text_color='black')
+        elif event == Event.VR_CONNECT:
+            print(f'State: {self.state}')
 
 
-def reset_console_box(frame):
-    frame.main_info_label.configure(text="Sample Audio Order:")
-    for i, label in enumerate(frame.stim_labels):
-        label.configure(text=f"Stim {i + 1}:", text_color='black', bg_color='#CFCFCF')
+        elif event == Event.LOAD_EXPERIMENT:
+            print(f'State: {self.state}')
+            print(f'Options: {self.gui.Main_Frame.option_var_exp.get()}')
 
 
+        elif event == Event.START_WARMUP:
+            print(f'State: {self.state}')
+            print(f'Options: {self.gui.Main_Frame.option_var_time_bw_samp.get()}')
 
 
-# Hardware Frame
-
-# , command=self.reset_tdt_hardware
-# TDT reset button command
-
-# , command=self.reset_headset_hardware
-# VR reset button command
+        elif event == Event.START_EXPERIMENT:
+            print(f'State: {self.state}')
+            print(f'Options: {self.gui.Main_Frame.option_var_time_bw_samp.get()}')
 
 
+        elif event == Event.END_EXPERIMENT:
+            print(f'State: {self.state}')
 
 
-
-# Load Experiment
-# , command=self.on_experiment_load
-
+        elif event == Event.PAUSE:
+            print(f'State: {self.state}')
 
 
-
-# Warm Up
-# , command=self.on_warmup_button_press
-
-
-
-# Start / Stop
-# , command=self.on_start_button_press
-
-# , command=self.on_end_button_press
+        elif event == Event.START_SPECIFIC_STIM:
+            print(f'State: {self.state}')
+            print(f'Options: {self.gui.Main_Frame.option_var_stim.get()}')
 
 
+        else: return
 
 
-# Action Functions
+        print('-'*40)
 
-# Widgets ---------------------------------------------------------------
-circuit = TDT_Circuit()
-headset = VR_Headset_Hardware()
-experiment_loaded = False
-experiment_started = False
+# Define the states using an enumeration
+class State(Enum):
+    IDLE = auto()
+    VR_INITIALIZING = auto()
+    VR_RUNNING = auto()
+    TDT_INITIALIZING = auto()
+    TDT_RUNNING = auto()
+    LOADING_EXPERIMENT = auto()
+    WARMUP_RUNNING = auto()
+    EXPERIMENT_RUNNING = auto()
+    EXPERIMENT_PAUSED = auto()
+    SHUTTING_DOWN = auto()
+
+# Define the events
+class Event(Enum):
+    TDT_CONNECT = auto()
+    VR_CONNECT = auto()
+    LOAD_EXPERIMENT = auto()
+    START_WARMUP = auto()
+    START_EXPERIMENT = auto()
+    END_EXPERIMENT = auto()
+    PAUSE = auto()
+    START_SPECIFIC_STIM = auto()
 
 
+'''
 # ACTION FUNCTIONS ---------------------------------------------
 def reset_tdt_hardware(self):
     self.circuit = TDT_Circuit()
@@ -133,8 +143,6 @@ def on_experiment_load(self):
         load_thread.start()
         self.parent.experiment_loaded = True
         self.loaded_experiment_name = self.option_var_exp.get()
-
-
 
 def load_audio_samples(self, experiment_id):
     self.audio_samples_list = circuit_data.load_audio_samples(experiment_id)
@@ -297,3 +305,6 @@ def on_end_button_press(self):
 def end_experiment_procedure(self):
     self.start_button.configure(text='Start Experiment', fg_color="#2B881A", hover_color='#389327', image=self.parent.start_icon)
     self.parent.experiment_started = False
+
+
+'''

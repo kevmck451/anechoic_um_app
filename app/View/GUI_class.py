@@ -4,20 +4,14 @@ import customtkinter as ctk
 import tkinter as tk
 import numpy as np
 import warnings
-
 from tkinter import ttk
-import threading
-import time
-
 
 import configuration
+from controller import Event
 
-from data_manager import circuit_data
-from utils_exp import CSVFile
-from utils_exp import time_class
 
 class GUI_class(ctk.CTk):
-    def __init__(self):
+    def __init__(self, event_handler):
         super().__init__()
 
         # Computer Icon
@@ -37,7 +31,7 @@ class GUI_class(ctk.CTk):
         self.minsize(configuration.min_window_width, configuration.min_window_height)
 
         self.Console_Frame = Console_Frame(self)
-        self.Main_Frame = Main_Frame(self, self.Console_Frame)
+        self.Main_Frame = Main_Frame(self, self.Console_Frame, event_handler)
 
         # Grid configuration
         self.columnconfigure(0, weight=2)  # Left column with 2/3 of the space
@@ -72,10 +66,32 @@ class Console_Frame(ctk.CTkFrame):
         for i in range(21):
             frame.grid_rowconfigure(i, weight=0)
 
+    def update_console_box(self, new_data, experiment, **kwargs):
+        text_color = kwargs.get('text_color', 'black')
+        number = kwargs.get('number', None)
+        bg_color = kwargs.get('bg_color', None)
+
+        self.main_info_label.configure(text=f"Sample Audio Order: Experiment {experiment}")
+        for i, data in enumerate(new_data):
+            if i + 1 == number:
+                self.stim_labels[i].configure(text=f"Stim {number}: {str(data).title()}", text_color=text_color,
+                                               bg_color='#B8B9B8')
+            elif bg_color is not None:
+                self.stim_labels[i].configure(text=f"Stim {i + 1}: {str(data).title()}", text_color='black',
+                                               bg_color=bg_color)
+            else:
+                self.stim_labels[i].configure(text=f"Stim {i + 1}: {str(data).title()}", text_color='black')
+
+    def reset_console_box(frame):
+        frame.main_info_label.configure(text="Sample Audio Order:")
+        for i, label in enumerate(frame.stim_labels):
+            label.configure(text=f"Stim {i + 1}:", text_color='black', bg_color='#CFCFCF')
+
 class Main_Frame(ctk.CTkFrame):
-    def __init__(self, parent, console_frame):
+    def __init__(self, parent, console_frame, event_handler):
         super().__init__(parent)
         self.console_frame = console_frame
+        self.event_handler = event_handler
 
         self.playing_icon = PhotoImage(file=configuration.playing_icon_filepath)
         self.start_icon = PhotoImage(file=configuration.start_icon_filepath)
@@ -155,19 +171,25 @@ class Main_Frame(ctk.CTkFrame):
         frame.grid_rowconfigure(1, weight=1)
 
         # TDT Connection Status
-        self.tdt_status = ctk.CTkLabel(frame, text=configuration.connection_status_TDT, text_color=configuration.not_connected_color, font=(configuration.main_font_style, configuration.main_font_size))
+        self.tdt_status = ctk.CTkLabel(frame, text=configuration.connection_status_TDT, text_color=configuration.not_connected_color,
+                                       font=(configuration.main_font_style, configuration.main_font_size))
         self.tdt_status.grid(row=0, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         # TDT Reset Button
-        self.reset_button_TDT = ctk.CTkButton(frame, text='TDT Reset', font=(configuration.main_font_style, configuration.main_font_size), fg_color=configuration.button_fg_color)
+        self.reset_button_TDT = ctk.CTkButton(frame, text='TDT Connect',
+                                              font=(configuration.main_font_style, configuration.main_font_size),
+                                              fg_color=configuration.button_fg_color, command=lambda: self.event_handler(Event.TDT_CONNECT))
         self.reset_button_TDT.grid(row=0, column=1, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         # VR Connection Status
-        self.vr_status = ctk.CTkLabel(frame, text=configuration.connection_status_VR, text_color=configuration.not_connected_color, font=(configuration.main_font_style, configuration.main_font_size))
+        self.vr_status = ctk.CTkLabel(frame, text=configuration.connection_status_VR, text_color=configuration.not_connected_color,
+                                      font=(configuration.main_font_style, configuration.main_font_size))
         self.vr_status.grid(row=1, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         # VR Reset Button
-        self.reset_button_VR = ctk.CTkButton(frame, text='VR Reset', font=(configuration.main_font_style, configuration.main_font_size), fg_color=configuration.button_fg_color)
+        self.reset_button_VR = ctk.CTkButton(frame, text='VR Connect',
+                                             font=(configuration.main_font_style, configuration.main_font_size),
+                                             fg_color=configuration.button_fg_color, command=lambda: self.event_handler(Event.VR_CONNECT))
         self.reset_button_VR.grid(row=1, column=1, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
     def select_experiment_frame(self, frame):
@@ -186,8 +208,10 @@ class Main_Frame(ctk.CTkFrame):
 
 
         # Load Experiment Button
-        self.experiment_button = ctk.CTkButton(frame, text='Load Experiment', font=(configuration.main_font_style, configuration.main_font_size),
-                                               fg_color=configuration.button_fg_color, image=self.load_icon)
+        self.experiment_button = ctk.CTkButton(frame, text='Load Experiment',
+                                               font=(configuration.main_font_style, configuration.main_font_size),
+                                               fg_color=configuration.button_fg_color,
+                                               image=self.load_icon, command=lambda: self.event_handler(Event.LOAD_EXPERIMENT))
         self.experiment_button.grid(row=1, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
     def warmup_frames(self, frame):
@@ -203,7 +227,7 @@ class Main_Frame(ctk.CTkFrame):
         self.warmup_button = ctk.CTkButton(frame, text="Play Warmup",
                                            font=(configuration.main_font_style, configuration.main_font_size),
                                            fg_color=configuration.button_fg_color, hover_color=configuration.button_hover_color,
-                                           image=self.start_icon)
+                                           image=self.start_icon, command=lambda: self.event_handler(Event.START_WARMUP))
         self.warmup_button.grid(row=0, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         self.warmup_test_1 = ctk.CTkLabel(frame, text='Test 1', text_color=configuration.warmup_test_color,
@@ -230,11 +254,11 @@ class Main_Frame(ctk.CTkFrame):
 
         self.start_button = ctk.CTkButton(frame, text='Start Experiment', font=(configuration.main_font_style, configuration.main_font_size),
                                           fg_color=configuration.start_fg_color, hover_color=configuration.start_hover_color,
-                                          image=self.start_icon)
+                                          image=self.start_icon, command=lambda: self.event_handler(Event.START_EXPERIMENT))
         self.start_button.grid(row=0, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
         self.end_button = ctk.CTkButton(frame, text='End Experiment', font=(configuration.main_font_style, configuration.main_font_size),
                                         fg_color=configuration.stop_fg_color, hover_color=configuration.stop_hover_color,
-                                        image=self.stop_icon)
+                                        image=self.stop_icon, command=lambda: self.event_handler(Event.END_EXPERIMENT))
         self.end_button.grid(row=1, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
     def pause_frames(self, frame):
@@ -246,7 +270,7 @@ class Main_Frame(ctk.CTkFrame):
 
         self.pause_button = ctk.CTkButton(frame, text='Pause', font=(configuration.main_font_style, configuration.main_font_size),
                                           fg_color=configuration.pause_fg_color, hover_color=configuration.pause_hover_color,
-                                          image=self.pause_icon)
+                                          image=self.pause_icon, command=lambda: self.event_handler(Event.PAUSE))
         self.pause_button.grid(row=0, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         # Stimulus Dropdown Box
@@ -259,7 +283,7 @@ class Main_Frame(ctk.CTkFrame):
 
         self.load_stim_button = ctk.CTkButton(frame, text='Load', font=(configuration.main_font_style, configuration.main_font_size),
                                               fg_color=configuration.button_fg_color, hover_color=configuration.button_hover_color,
-                                              image=self.load_icon)
+                                              image=self.load_icon, command=lambda: self.event_handler(Event.START_SPECIFIC_STIM))
         self.load_stim_button.grid(row=2, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         # Stimulus Dropdown Box
@@ -360,5 +384,5 @@ class Main_Frame(ctk.CTkFrame):
 
 
 
-if __name__ == "__main__":
-    GUI_class()
+# if __name__ == "__main__":
+    # GUI_class()
