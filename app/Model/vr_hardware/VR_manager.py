@@ -3,11 +3,16 @@ import numpy as np
 
 class VR_Headset_Hardware:
     def __init__(self):
-        random = np.random.choice([True, False])
-        if random:
+        print('initializing VR Hardware')
+        self.headset_state = bool
+
+        try:
+            # connect to headset
             self.headset_state = True
-        else:
+
+        except Exception as e:
             self.headset_state = False
+
 
     def get_vr_input(self):
         random = np.random.choice([True, False])

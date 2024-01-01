@@ -41,6 +41,19 @@ class GUI_class(ctk.CTk):
         self.Main_Frame.grid(row=0, column=0, sticky='nsew')  # Left frame in column 0
         self.Console_Frame.grid(row=0, column=1, sticky='nsew')  # Right frame in column 1
 
+        # Ending Procedures
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    def on_close(self):
+        # Perform any cleanup or process termination steps here
+        # For example, safely terminate any running threads, save state, release resources, etc.
+
+        print("Performing cleanup before exiting...")  # Replace this with actual cleanup code
+
+        # End the application
+        self.destroy()
+
+
 class Console_Frame(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -82,9 +95,9 @@ class Console_Frame(ctk.CTkFrame):
             else:
                 self.stim_labels[i].configure(text=f"Stim {i + 1}: {str(data).title()}", text_color='black')
 
-    def reset_console_box(frame):
-        frame.main_info_label.configure(text="Sample Audio Order:")
-        for i, label in enumerate(frame.stim_labels):
+    def reset_console_box(self):
+        self.main_info_label.configure(text="Sample Audio Order:")
+        for i, label in enumerate(self.stim_labels):
             label.configure(text=f"Stim {i + 1}:", text_color='black', bg_color='#CFCFCF')
 
 class Main_Frame(ctk.CTkFrame):
@@ -176,7 +189,7 @@ class Main_Frame(ctk.CTkFrame):
         self.tdt_status.grid(row=0, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         # TDT Reset Button
-        self.reset_button_TDT = ctk.CTkButton(frame, text='TDT Connect',
+        self.reset_button_TDT = ctk.CTkButton(frame, text='Connect',
                                               font=(configuration.main_font_style, configuration.main_font_size),
                                               fg_color=configuration.button_fg_color, command=lambda: self.event_handler(Event.TDT_CONNECT))
         self.reset_button_TDT.grid(row=0, column=1, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
@@ -187,7 +200,7 @@ class Main_Frame(ctk.CTkFrame):
         self.vr_status.grid(row=1, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         # VR Reset Button
-        self.reset_button_VR = ctk.CTkButton(frame, text='VR Connect',
+        self.reset_button_VR = ctk.CTkButton(frame, text='Connect',
                                              font=(configuration.main_font_style, configuration.main_font_size),
                                              fg_color=configuration.button_fg_color, command=lambda: self.event_handler(Event.VR_CONNECT))
         self.reset_button_VR.grid(row=1, column=1, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')

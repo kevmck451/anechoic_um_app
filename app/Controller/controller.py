@@ -1,12 +1,12 @@
 
 from enum import Enum, auto
 
+from TDT_manager import TDT_Circuit
+from VR_manager import VR_Headset_Hardware
 
 class Controller:
-    def __init__(self, tdt_hardware, vr_hardware):
-        self.tdt_hardware = tdt_hardware
-        self.vr_hardware = vr_hardware
-        self.state = State.IDLE
+    def __init__(self):
+        self.app_state = State.IDLE
 
     def set_gui(self, gui):
         self.gui = gui
@@ -16,45 +16,72 @@ class Controller:
 
         # These are the gate keepers for whether or not to perform the action
         if event == Event.TDT_CONNECT:
-            print(f'State: {self.state}')
+            self.app_state = State.VR_INITIALIZING
+            print(f'State: {self.app_state}')
+            self.tdt_hardware = TDT_Circuit()
 
 
         elif event == Event.VR_CONNECT:
-            print(f'State: {self.state}')
+            self.app_state = State.VR_RUNNING
+            print(f'State: {self.app_state}')
+            self.vr_hardware = VR_Headset_Hardware()
 
 
         elif event == Event.LOAD_EXPERIMENT:
-            print(f'State: {self.state}')
+            self.app_state = State.LOADING_EXPERIMENT
+            print(f'State: {self.app_state}')
             print(f'Options: {self.gui.Main_Frame.option_var_exp.get()}')
 
 
         elif event == Event.START_WARMUP:
-            print(f'State: {self.state}')
+            self.app_state = State.WARMUP_RUNNING
+            print(f'State: {self.app_state}')
             print(f'Options: {self.gui.Main_Frame.option_var_time_bw_samp.get()}')
 
 
         elif event == Event.START_EXPERIMENT:
-            print(f'State: {self.state}')
+            self.app_state = State.EXPERIMENT_RUNNING
+            print(f'State: {self.app_state}')
             print(f'Options: {self.gui.Main_Frame.option_var_time_bw_samp.get()}')
 
 
         elif event == Event.END_EXPERIMENT:
-            print(f'State: {self.state}')
+            self.app_state = State.EXPERIMENT_ENDED
+            print(f'State: {self.app_state}')
 
 
         elif event == Event.PAUSE:
-            print(f'State: {self.state}')
+            self.app_state = State.EXPERIMENT_PAUSED
+            print(f'State: {self.app_state}')
 
 
         elif event == Event.START_SPECIFIC_STIM:
-            print(f'State: {self.state}')
+            print(f'State: {self.app_state}')
             print(f'Options: {self.gui.Main_Frame.option_var_stim.get()}')
 
 
         else: return
 
-
         print('-'*40)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Define the states using an enumeration
 class State(Enum):
@@ -67,6 +94,7 @@ class State(Enum):
     WARMUP_RUNNING = auto()
     EXPERIMENT_RUNNING = auto()
     EXPERIMENT_PAUSED = auto()
+    EXPERIMENT_ENDED = auto()
     SHUTTING_DOWN = auto()
 
 # Define the events

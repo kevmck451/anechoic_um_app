@@ -5,26 +5,32 @@ import sounddevice as sd
 
 class TDT_Circuit:
     def __init__(self):
-        random = np.random.choice([True, False])
-        if random: self.circuit_state = True
-        else: self.circuit_state = False
+        print('initializing TDT Hardware')
+        # random = np.random.choice([True, False])
+        # if random: self.circuit_state = True
+        # else: self.circuit_state = False
+        self.circuit_state = bool
 
         RPvds_circuit_filepath = 'tdt_circuit.rcx'
 
-        # try:
-        #     project = DSPProject()
-        #     self.circuit = project.load_circuit(
-        #         circuit_name = RPvds_circuit_filepath,
-        #         device_name = 'RX8')
-        #     self.circuit.start()
-        #
-        #     if self.circuit.is_connected:
-        #         # print('Hardware is Connected')
-        #         self.circuit_state = True
-        #     else: self.circuit_state = False
-        #
+        try:
+            project = DSPProject()
+            self.circuit = project.load_circuit(
+                circuit_name = RPvds_circuit_filepath,
+                device_name = 'RX8')
+            self.circuit.start()
+
+            if self.circuit.is_connected:
+                # print('Hardware is Connected')
+                self.circuit_state = True
+            else: self.circuit_state = False
+
         # except DSPError as e:
+        #     self.circuit_state = False
         #     pass
+
+        except Exception as e:
+            self.circuit_state = False
 
 
     def trigger_audio_sample(self, audio_sample, channel):
