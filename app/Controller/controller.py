@@ -14,50 +14,70 @@ class Controller:
         self.channel_list = list
         self.loaded_experiment_name = str
         self.experiment_loaded = False
+        self.tdt_hardware = object
+        self.vr_hardware = object
 
     def set_gui(self, gui):
         self.gui = gui
 
     def handle_event(self, event):
-        print(event)
-
-
+        # print(event)
+        # print(f'State: {self.app_state}')
 
 
         # These are the gate keepers for whether or not to perform the action
+        # Connect to TDT Hardware: todo
         if event == Event.TDT_CONNECT:
-            self.app_state = State.VR_INITIALIZING
-            print(f'State: {self.app_state}')
+            self.app_state = State.TDT_INITIALIZING
             self.tdt_hardware = TDT_Circuit()
+            self.app_state = State.IDLE
 
-
+        # Connect to VR Hardware: todo
         elif event == Event.VR_CONNECT:
-            self.app_state = State.VR_RUNNING
-            print(f'State: {self.app_state}')
+            self.app_state = State.VR_INITIALIZING
             self.vr_hardware = VR_Headset_Hardware()
+            self.app_state = State.IDLE
 
         # Load Experiment: FINISHED
         elif event == Event.LOAD_EXPERIMENT:
-            selected_value = self.gui.Main_Frame.option_var_exp.get()
 
-            if selected_value != 'Select an Experiment':
-                if selected_value == self.loaded_experiment_name:
-                    self.gui.Main_Frame.warning_popup_general(message='Experiment already Loaded')
+            if self.app_state != State.EXPERIMENT_RUNNING and self.app_state != State.LOADING_EXPERIMENT and \
+                    self.app_state != State.VR_INITIALIZING and self.app_state != State.TDT_INITIALIZING:
+                selected_value = self.gui.Main_Frame.option_var_exp.get()
+
+                if selected_value != 'Select an Experiment':
+                    if selected_value == self.loaded_experiment_name:
+                        self.gui.Main_Frame.warning_popup_general(message='Experiment already Loaded')
+                    else:
+                        self.loaded_experiment_name = selected_value
+                        self.app_state = State.LOADING_EXPERIMENT
+                        self.load_experiment(selected_value)
                 else:
-                    self.loaded_experiment_name = selected_value
-                    self.app_state = State.LOADING_EXPERIMENT
-                    self.load_experiment(selected_value)
-            else:
-                if selected_value == 'Select an Experiment':
-                    self.gui.Main_Frame.warning_popup_general(message='Need to select an Experiment')
-                else: pass
+                    if selected_value == 'Select an Experiment':
+                        self.gui.Main_Frame.warning_popup_general(message='Need to select an Experiment')
+                    else: pass
+            else: pass
 
+        # Start Warmup: todo
         elif event == Event.START_WARMUP:
-            self.app_state = State.WARMUP_RUNNING
-            print(f'State: {self.app_state}')
-            print(f'Options: {self.gui.Main_Frame.option_var_time_bw_samp.get()}')
+
+            if self.app_state != State.EXPERIMENT_RUNNING and self.app_state != State.LOADING_EXPERIMENT and \
+                    self.app_state != State.VR_INITIALIZING and self.app_state != State.TDT_INITIALIZING:
+                self.app_state = State.WARMUP_RUNNING
+                # print(f'Options: {self.gui.Main_Frame.option_var_time_bw_samp.get()}')
+                time_bw_samples = self.gui.Main_Frame.option_var_time_bw_samp.get()
 
 
+
+            else:
+                pass
+
+
+
+
+
+
+        # Start Experiment: todo
         elif event == Event.START_EXPERIMENT:
             self.app_state = State.EXPERIMENT_RUNNING
             print(f'State: {self.app_state}')
@@ -74,17 +94,17 @@ class Controller:
             #     self.warning_popup_general(message='TDT Hardware Not Connected')
             #     return
 
-
+        # End Experiment: todo
         elif event == Event.END_EXPERIMENT:
             self.app_state = State.EXPERIMENT_ENDED
             print(f'State: {self.app_state}')
 
-
+        # Pause Experiment: todo
         elif event == Event.PAUSE:
             self.app_state = State.EXPERIMENT_PAUSED
             print(f'State: {self.app_state}')
 
-
+        # Load from Specific Stimulus Number: todo
         elif event == Event.START_SPECIFIC_STIM:
             print(f'State: {self.app_state}')
             print(f'Options: {self.gui.Main_Frame.option_var_stim.get()}')
@@ -98,18 +118,17 @@ class Controller:
     def load_experiment(self, selected_value):
         exp_num = selected_value.split(' ')[1]
         self.sample_names_list = circuit_data.load_audio_names(exp_num)
-        self.gui.Console_Frame.update_console_box(self.sample_names_list, experiment=exp_num)
         self.gui.Main_Frame.manage_loading_audio_popup(show=True)
-        load_thread = Thread(target=self.load_audio_samples, args=exp_num)
+        load_thread = Thread(target=self.load_audio_samples, args=exp_num, daemon=True)
         load_thread.start()
-
-
 
     def load_audio_samples(self, experiment_id):
         self.audio_samples_list = circuit_data.load_audio_samples(experiment_id)
         self.channel_list = circuit_data.load_channel_numbers(experiment_id)
         self.experiment_loaded = True
+        self.gui.Console_Frame.update_console_box(self.sample_names_list, experiment=experiment_id)
         self.gui.Main_Frame.close_loading_popup()
+        self.app_state = State.IDLE
 
 
 
@@ -124,9 +143,7 @@ class Controller:
 class State(Enum):
     IDLE = auto()
     VR_INITIALIZING = auto()
-    VR_RUNNING = auto()
     TDT_INITIALIZING = auto()
-    TDT_RUNNING = auto()
     LOADING_EXPERIMENT = auto()
     WARMUP_RUNNING = auto()
     EXPERIMENT_RUNNING = auto()
@@ -205,7 +222,7 @@ def on_warmup_button_press(self):
     #     self.warning_popup_general(message='VR Headset Not Connected')
     #     return
 
-    task_thread = threading.Thread(target=self.trigger_warmup_audio_samples)
+    task_thread = Thread(target=self.trigger_warmup_audio_samples)
     task_thread.start()
 
 def trigger_warmup_audio_samples(self):
