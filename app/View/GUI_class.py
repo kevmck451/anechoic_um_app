@@ -34,7 +34,7 @@ class GUI_class(ctk.CTk):
         self.Main_Frame = Main_Frame(self, self.Console_Frame, event_handler)
 
         # Grid configuration
-        self.columnconfigure(0, weight=2)  # Left column with 2/3 of the space
+        self.columnconfigure(0, weight=1)  # Left column with 2/3 of the space
         self.columnconfigure(1, weight=1)  # Right column with 1/3 of the space
 
         # Place the frames using grid
@@ -106,11 +106,16 @@ class Main_Frame(ctk.CTkFrame):
         self.console_frame = console_frame
         self.event_handler = event_handler
 
+        self.warmup_button_state = True
+        self.start_button_state = True
+        self.pause_button_state = True
+
         self.playing_icon = PhotoImage(file=configuration.playing_icon_filepath)
         self.start_icon = PhotoImage(file=configuration.start_icon_filepath)
         self.stop_icon = PhotoImage(file=configuration.stop_icon_filepath)
         self.pause_icon = PhotoImage(file=configuration.pause_icon_filepath)
         self.load_icon = PhotoImage(file=configuration.load_icon_filepath)
+        self.settings_icon = PhotoImage(file=configuration.settings_icon_filepath)
         warnings.filterwarnings('ignore', category=UserWarning, module='customtkinter.*')
 
         # Top Frame
@@ -137,13 +142,13 @@ class Main_Frame(ctk.CTkFrame):
         middle_frame_1.grid(row=0, column=0, padx=configuration.x_pad_1, pady=configuration.y_pad_1, sticky='nsew')
         middle_frame_2 = ctk.CTkFrame(middle_frame)
         middle_frame_2.grid(row=0, column=1, padx=configuration.x_pad_1, pady=configuration.y_pad_1, sticky='nsew')
-        middle_frame_3 = ctk.CTkFrame(middle_frame)
-        middle_frame_3.grid(row=0, column=2, padx=configuration.x_pad_1, pady=configuration.y_pad_1, sticky='nsew')
+        # middle_frame_3 = ctk.CTkFrame(middle_frame)
+        # middle_frame_3.grid(row=0, column=2, padx=configuration.x_pad_1, pady=configuration.y_pad_1, sticky='nsew')
 
         # Configure the grid of the middle_frame
         middle_frame.grid_columnconfigure(0, weight=1, uniform='col')  # First column
         middle_frame.grid_columnconfigure(1, weight=1, uniform='col')  # Second column
-        middle_frame.grid_columnconfigure(2, weight=1, uniform='col')  # Third column
+        # middle_frame.grid_columnconfigure(2, weight=1, uniform='col')  # Third column
         middle_frame.grid_rowconfigure(0, weight=1, uniform='row')
 
         # Bottom Frame
@@ -171,7 +176,7 @@ class Main_Frame(ctk.CTkFrame):
         self.select_experiment_frame(top_right_frame)
         self.warmup_frames(middle_frame_1)
         self.start_stop_frames(middle_frame_2)
-        self.pause_frames(middle_frame_3)
+        # self.pause_frames(middle_frame_3)
         self.experiment_metadata_frames_1(bottom_left_frame)
         self.experiment_metadata_frames_2(bottom_right_frame)
 
@@ -239,7 +244,7 @@ class Main_Frame(ctk.CTkFrame):
         # Sub Sub Frame of Warm Up ----------------------------------------
         self.warmup_button = ctk.CTkButton(frame, text="Play Warmup",
                                            font=(configuration.main_font_style, configuration.main_font_size),
-                                           fg_color=configuration.button_fg_color, hover_color=configuration.button_hover_color,
+                                           fg_color=configuration.start_fg_color, hover_color=configuration.start_hover_color,
                                            image=self.start_icon, command=lambda: self.event_handler(Event.START_WARMUP))
         self.warmup_button.grid(row=0, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
@@ -263,28 +268,32 @@ class Main_Frame(ctk.CTkFrame):
 
         frame.grid_rowconfigure(0, weight=1)  # Row for the load button
         frame.grid_rowconfigure(1, weight=1)  # Row for the load button
+        frame.grid_rowconfigure(2, weight=1)  # Row for the load button
         frame.grid_columnconfigure(0, weight=1)  # Single column
 
         self.start_button = ctk.CTkButton(frame, text='Start Experiment', font=(configuration.main_font_style, configuration.main_font_size),
                                           fg_color=configuration.start_fg_color, hover_color=configuration.start_hover_color,
                                           image=self.start_icon, command=lambda: self.event_handler(Event.START_EXPERIMENT))
         self.start_button.grid(row=0, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
-        self.end_button = ctk.CTkButton(frame, text='End Experiment', font=(configuration.main_font_style, configuration.main_font_size),
-                                        fg_color=configuration.stop_fg_color, hover_color=configuration.stop_hover_color,
-                                        image=self.stop_icon, command=lambda: self.event_handler(Event.END_EXPERIMENT))
-        self.end_button.grid(row=1, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
+
+        self.pause_button = ctk.CTkButton(frame, text='Pause',
+                                          font=(configuration.main_font_style, configuration.main_font_size),
+                                          fg_color=configuration.button_fg_color,
+                                          hover_color=configuration.button_hover_color,
+                                          image=self.pause_icon, command=lambda: self.event_handler(Event.PAUSE))
+        self.pause_button.grid(row=1, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
+
+        self.settings_button = ctk.CTkButton(frame, text='Settings', font=(configuration.main_font_style, configuration.main_font_size),
+                                        fg_color=configuration.settings_fg_color, hover_color=configuration.settings_hover_color,
+                                        image=self.settings_icon, command=lambda: self.event_handler(Event.SETTINGS))
+        self.settings_button.grid(row=2, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
     def pause_frames(self, frame):
         frame.grid_rowconfigure(0, weight=1)  # Row for the load button
         frame.grid_rowconfigure(1, weight=1)  # Row for the load button
-        frame.grid_rowconfigure(2, weight=1)  # Row for the load button
-        frame.grid_rowconfigure(3, weight=1)  # Row for the load button
+        # frame.grid_rowconfigure(2, weight=1)  # Row for the load button
         frame.grid_columnconfigure(0, weight=1)  # Single column
 
-        self.pause_button = ctk.CTkButton(frame, text='Pause', font=(configuration.main_font_style, configuration.main_font_size),
-                                          fg_color=configuration.pause_fg_color, hover_color=configuration.pause_hover_color,
-                                          image=self.pause_icon, command=lambda: self.event_handler(Event.PAUSE))
-        self.pause_button.grid(row=0, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         # Stimulus Dropdown Box
         dropdown_values_stim = [f'Stimulus Start Number: {x}' for x in range(1, 101)]
@@ -292,20 +301,25 @@ class Main_Frame(ctk.CTkFrame):
         self.dropdown_stim = ctk.CTkOptionMenu(frame, variable=self.option_var_stim, values=dropdown_values_stim,
                                                font=(configuration.main_font_style, configuration.main_font_size),
                                                fg_color=configuration.dropdown_fg_color, dropdown_hover_color=configuration.button_hover_color)
-        self.dropdown_stim.grid(row=1, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
+        self.dropdown_stim.grid(row=0, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         self.load_stim_button = ctk.CTkButton(frame, text='Load', font=(configuration.main_font_style, configuration.main_font_size),
                                               fg_color=configuration.button_fg_color, hover_color=configuration.button_hover_color,
                                               image=self.load_icon, command=lambda: self.event_handler(Event.START_SPECIFIC_STIM))
-        self.load_stim_button.grid(row=2, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
+        self.load_stim_button.grid(row=1, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         # Stimulus Dropdown Box
         dropdown_values_time_bw_samp = [f'Time bw Samples: {x} sec' for x in np.arange(0.5, 4.5, 0.5)]
-        self.option_var_time_bw_samp = tk.StringVar(value=dropdown_values_time_bw_samp[3])  # Set initial value to the prompt text
-        self.dropdown_time_bw_samp = ctk.CTkOptionMenu(frame, variable=self.option_var_time_bw_samp, values=dropdown_values_time_bw_samp,
-                                                       font=(configuration.main_font_style, configuration.main_font_size),
-                                                       fg_color=configuration.dropdown_fg_color, dropdown_hover_color=configuration.dropdown_hover_color)
-        self.dropdown_time_bw_samp.grid(row=3, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
+        self.option_var_time_bw_samp = tk.StringVar(
+            value=dropdown_values_time_bw_samp[3])  # Set initial value to the prompt text
+        self.dropdown_time_bw_samp = ctk.CTkOptionMenu(frame, variable=self.option_var_time_bw_samp,
+                                                       values=dropdown_values_time_bw_samp,
+                                                       font=(
+                                                           configuration.main_font_style, configuration.main_font_size),
+                                                       fg_color=configuration.dropdown_fg_color,
+                                                       dropdown_hover_color=configuration.dropdown_hover_color)
+        self.dropdown_time_bw_samp.grid(row=2, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2,
+                                        sticky='nsew')
 
     def experiment_metadata_frames_1(self, frame):
 
@@ -396,6 +410,64 @@ class Main_Frame(ctk.CTkFrame):
         ok_button = tk.Button(message_popup, text="OK", background="#D3D3D3", padx=10, pady=10,
                               command=message_popup.destroy)
         ok_button.pack(pady=10)
+
+    def toggle_warmup_button(self):
+        if self.warmup_button_state:
+            self.warmup_button.configure(text="End Warmup",
+                                               fg_color=configuration.stop_fg_color,
+                                               hover_color=configuration.stop_hover_color,
+                                               image=self.stop_icon,
+                                               command=lambda: self.event_handler(Event.END_WARMUP))
+            self.warmup_button_state = False
+        else:
+            self.warmup_button.configure(text="Play Warmup",
+                                               fg_color=configuration.start_fg_color,
+                                               hover_color=configuration.start_hover_color,
+                                               image=self.start_icon,
+                                               command=lambda: self.event_handler(Event.START_WARMUP))
+            self.warmup_button_state = True
+
+    def toggle_start_button(self):
+        if self.start_button_state:
+            self.start_button.configure(text="End Experiment",
+                                               fg_color=configuration.stop_fg_color,
+                                               hover_color=configuration.stop_hover_color,
+                                               image=self.stop_icon,
+                                               command=lambda: self.event_handler(Event.END_EXPERIMENT))
+            self.start_button_state = False
+        else:
+            self.start_button.configure(text="Start Experiment",
+                                               fg_color=configuration.start_fg_color,
+                                               hover_color=configuration.start_hover_color,
+                                               image=self.start_icon,
+                                               command=lambda: self.event_handler(Event.START_EXPERIMENT))
+            self.start_button_state = True
+
+    def toggle_pause_button(self):
+        if self.pause_button_state:
+            self.pause_button.configure(text="Resume",
+                                               fg_color=configuration.start_fg_color,
+                                               hover_color=configuration.start_hover_color,
+                                               image=self.start_icon,
+                                               command=lambda: self.event_handler(Event.RESUME))
+            self.pause_button_state = False
+        else:
+            self.pause_button.configure(text="Pause",
+                                               fg_color=configuration.button_fg_color,
+                                               hover_color=configuration.button_hover_color,
+                                               image=self.pause_icon,
+                                               command=lambda: self.event_handler(Event.PAUSE))
+            self.pause_button_state = True
+
+    def reset_metadata_displays(self):
+        self.current_stimulus_display.configure(text='None')
+        self.speaker_projected_display.configure(text='None')
+        self.selection_made_display.configure(text='None')
+        self.total_time_display.configure(text='00:00')
+
+    def reset_dropdown_box(self):
+        self.option_var_exp.set('Select an Experiment')
+
 
 
 
