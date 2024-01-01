@@ -375,6 +375,9 @@ class Main_Frame(ctk.CTkFrame):
                 self.progress.stop()
                 self.loading_popup.destroy()
 
+    def close_loading_popup(self):
+        self.manage_loading_audio_popup(show=False)
+
     def warning_popup_general(self, message):
         message_popup = tk.Toplevel(self)
         message_popup.title("Message")
