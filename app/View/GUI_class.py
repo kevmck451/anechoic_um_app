@@ -10,6 +10,7 @@ import configuration
 from controller import Event
 
 
+
 class GUI_class(ctk.CTk):
     def __init__(self, event_handler):
         super().__init__()
@@ -467,6 +468,17 @@ class Main_Frame(ctk.CTkFrame):
 
     def reset_dropdown_box(self):
         self.option_var_exp.set('Select an Experiment')
+
+    def start_experiment_timer(self):
+        self.experiment_total_time_object = time_class('Experiment Total Time')
+
+    def update_experiment_timer(self):
+        time = self.experiment_total_time_object.stats()
+        self.total_time_display.configure(text=time)
+        self.parent.after(500, self.update_experiment_total_time_display)
+
+    def stop_experiment_timer(self):
+
 
 
 

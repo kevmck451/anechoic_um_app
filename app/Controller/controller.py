@@ -344,16 +344,7 @@ def on_start_button_press(self):
     task_thread.start()
 
 def experiment_timer(self):
-    self.experiment_total_time_object = time_class('Experiment Total Time')
 
-def update_experiment_stim_number_display(self, value):
-    self.current_stimulus_display.configure(text=value)
-
-def update_experiment_speaker_proj_display(self, value):
-    self.speaker_projected_display.configure(text=value)
-
-def update_experiment_speaker_selected_display(self, value):
-    self.selection_made_display.configure(text=value)
 
 def update_experiment_total_time_display(self):
     if self.parent.experiment_started:
