@@ -1,5 +1,4 @@
 from Main_Window import Main_Window
-from settings import Settings_Window
 from controller import Controller
 
 if __name__ == "__main__":

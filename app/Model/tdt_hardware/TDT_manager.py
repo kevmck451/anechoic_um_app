@@ -9,10 +9,12 @@ class TDT_Circuit:
         # random = np.random.choice([True, False])
         # if random: self.circuit_state = True
         # else: self.circuit_state = False
-        self.circuit_state = bool
+        self.circuit_state = False
 
         RPvds_circuit_filepath = 'tdt_circuit.rcx'
 
+
+    def connect_hardware(self):
         try:
             project = DSPProject()
             self.circuit = project.load_circuit(
@@ -33,15 +35,19 @@ class TDT_Circuit:
             self.circuit_state = False
 
 
-    def trigger_audio_sample(self, audio_sample, channel):
+    def trigger_audio_sample_computer(self, audio_sample, channel):
         sd.play(audio_sample.data, audio_sample.sample_rate)
         sd.wait()
 
-        # speaker_buffer = self.circuit.get_buffer(data_tag='speaker', mode='w')
-        # speaker_buffer.set(audio_sample.data)
-        #
-        # self.circuit.set_tag("chan", channel)
-        #
-        # self.circuit.trigger(trigger=1)
+
+
+    def trigger_audio_sample(self, audio_sample, channel):
+
+        speaker_buffer = self.circuit.get_buffer(data_tag='speaker', mode='w')
+        speaker_buffer.set(audio_sample.data)
+
+        self.circuit.set_tag("chan", channel)
+
+        self.circuit.trigger(trigger=1)
 
 

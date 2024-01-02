@@ -2,7 +2,6 @@ from tkinter import PhotoImage
 from PIL import Image, ImageTk
 import customtkinter as ctk
 import tkinter as tk
-import numpy as np
 import warnings
 from tkinter import ttk
 
@@ -101,6 +100,7 @@ class Console_Frame(ctk.CTkFrame):
         self.main_info_label.configure(text="Sample Audio Order:")
         for i, label in enumerate(self.stim_labels):
             label.configure(text=f"Stim {i + 1}:", text_color='black', bg_color='#CFCFCF')
+
 
 class Main_Frame(ctk.CTkFrame):
     def __init__(self, parent, console_frame, event_handler):
@@ -501,5 +501,3 @@ class Main_Frame(ctk.CTkFrame):
 
 
 
-# if __name__ == "__main__":
-    # Main_Window()

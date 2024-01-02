@@ -8,6 +8,7 @@ from data_manager import circuit_data
 from experiment_state import Experiment
 from settings import Settings_Window
 from events import Event
+import configuration
 
 class Controller:
     def __init__(self):
@@ -17,9 +18,10 @@ class Controller:
         self.channel_list = list
         self.loaded_experiment_name = str
         self.experiment_loaded = False
-        self.tdt_hardware = object
-        self.vr_hardware = object
+        self.tdt_hardware = TDT_Circuit()
+        self.vr_hardware = VR_Headset_Hardware()
         self.experiment = Experiment()
+        self.warmup = Experiment()
 
     def set_gui(self, gui):
         self.gui = gui
@@ -30,14 +32,14 @@ class Controller:
         if event == Event.TDT_CONNECT:
             if self.app_state == State.IDLE:
                 self.app_state = State.TDT_INITIALIZING
-                self.tdt_hardware = TDT_Circuit()
+                self.tdt_hardware.connect_hardware()
                 self.app_state = State.IDLE
 
         # Connect to VR Hardware:
         elif event == Event.VR_CONNECT:
             if self.app_state == State.IDLE:
                 self.app_state = State.VR_INITIALIZING
-                self.vr_hardware = VR_Headset_Hardware()
+                self.vr_hardware.connect()
                 self.app_state = State.IDLE
 
         # Load Experiment: FINISHED
@@ -59,7 +61,6 @@ class Controller:
         # Start Warmup:
         elif event == Event.START_WARMUP:
             if self.app_state == State.IDLE:
-                self.app_state = State.WARMUP_RUNNING
                 self.start_warmup()
 
         # END Warmup:
@@ -112,7 +113,10 @@ class Controller:
         # Get Current Stim Number to Display
         elif event == Event.STIM_NUMBER:
             # set gui variable from experiment variable
-            self.gui.Main_Frame.current_stim_number = self.experiment.get_current_stim_number()
+            if self.app_state == State.WARMUP_RUNNING:
+                self.gui.Main_Frame.current_stim_number = self.warmup.get_current_stim_number()
+            elif self.app_state == State.EXPERIMENT_RUNNING:
+                self.gui.Main_Frame.current_stim_number = self.experiment.get_current_stim_number()
 
         # Reset Experiment Conditions
         elif event == Event.RESET_EXPERIMENT:
@@ -123,6 +127,11 @@ class Controller:
         elif event == Event.SET_STIM_NUMBER:
             # Number to set trigger audio to
             print(self.settings_window.Main_Frame.option_var_stim.get())
+
+        # Set default time between samples value
+        elif event == Event.SET_DEFAULT_BW_TIME:
+            # get value selected and set default
+            configuration.set_default_time_bw_samples_value(self.settings_window.Main_Frame.option_var_time_bw_samp.get())
 
     def load_experiment(self, selected_value):
         exp_num = selected_value.split(' ')[1]
@@ -141,10 +150,42 @@ class Controller:
         self.app_state = State.IDLE
 
     def start_warmup(self):
+        self.app_state = State.WARMUP_RUNNING
         self.gui.Main_Frame.toggle_warmup_button()
+        warmup_audio, warmup_channels = circuit_data.load_warmup_data()
+        self.warmup.set_audio_channel_list(warmup_audio, warmup_channels)
+        self.warmup.experiment_in_progress = True
+
+
+        stim_number = 0
+        # trigger audio for stim 0
+        self.warmup.update_current_stim_number(stim_number)
+        self.warmup.audio_sample_list[stim_number]
+        self.warmup.channel_list[stim_number]
+
+
+
+
+        if self.tdt_hardware.circuit_state == False:
+            pass
+
+        else:
+            # real TDT Hardware code here
+            pass
+
+
+
 
         # task_thread = Thread(target=self.trigger_warmup_audio_samples)
         # task_thread.start()
+
+    def perform_warmup_round(self):
+
+
+
+
+        self.warmup.experiment_in_progress = False
+
 
     def end_warmup(self):
         self.gui.Main_Frame.toggle_warmup_button()
@@ -241,19 +282,6 @@ def check_hardware_status(self):
     self.parent.after(500, self.check_hardware_status)
 
 # ---------------------------------------------
-def on_warmup_button_press(self):
-
-    if self.parent.experiment_started:
-        return
-    if self.parent.circuit.circuit_state == False:
-        self.warning_popup_general(message='TDT Hardware Not Connected')
-        return
-    # if self.parent.headset.headset_state == False:
-    #     self.warning_popup_general(message='VR Headset Not Connected')
-    #     return
-
-    task_thread = Thread(target=self.trigger_warmup_audio_samples)
-    task_thread.start()
 
 def trigger_warmup_audio_samples(self):
 
