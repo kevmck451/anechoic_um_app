@@ -5,7 +5,7 @@ import sounddevice as sd
 
 class TDT_Circuit:
     def __init__(self):
-        print('initializing TDT Hardware')
+        print('Initializing TDT Hardware')
         # random = np.random.choice([True, False])
         # if random: self.circuit_state = True
         # else: self.circuit_state = False

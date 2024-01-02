@@ -12,7 +12,7 @@ from utils_exp import time_class
 
 
 
-class GUI_class(ctk.CTk):
+class Main_Window(ctk.CTk):
     def __init__(self, event_handler):
         super().__init__()
 
@@ -502,4 +502,4 @@ class Main_Frame(ctk.CTkFrame):
 
 
 # if __name__ == "__main__":
-    # GUI_class()
+    # Main_Window()

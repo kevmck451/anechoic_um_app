@@ -7,6 +7,7 @@ from VR_manager import VR_Headset_Hardware
 from data_manager import circuit_data
 from experiment_state import Experiment
 from settings import Settings_Window
+from events import Event
 
 class Controller:
     def __init__(self):
@@ -23,19 +24,16 @@ class Controller:
     def set_gui(self, gui):
         self.gui = gui
 
+    # These are the gate keepers for whether or not to perform the action
     def handle_event(self, event):
-        # print(event)
-        # print(f'State: {self.app_state}')
-
-        # These are the gate keepers for whether or not to perform the action
-        # Connect to TDT Hardware: todo
+        # Connect to TDT Hardware:
         if event == Event.TDT_CONNECT:
             if self.app_state == State.IDLE:
                 self.app_state = State.TDT_INITIALIZING
                 self.tdt_hardware = TDT_Circuit()
                 self.app_state = State.IDLE
 
-        # Connect to VR Hardware: todo
+        # Connect to VR Hardware:
         elif event == Event.VR_CONNECT:
             if self.app_state == State.IDLE:
                 self.app_state = State.VR_INITIALIZING
@@ -44,8 +42,7 @@ class Controller:
 
         # Load Experiment: FINISHED
         elif event == Event.LOAD_EXPERIMENT:
-            if self.app_state != State.EXPERIMENT_RUNNING and self.app_state != State.LOADING_EXPERIMENT and \
-                    self.app_state != State.VR_INITIALIZING and self.app_state != State.TDT_INITIALIZING:
+            if self.app_state == State.IDLE:
                 selected_value = self.gui.Main_Frame.option_var_exp.get()
 
                 if selected_value != 'Select an Experiment':
@@ -92,33 +89,40 @@ class Controller:
                 self.app_state = State.EXPERIMENT_ENDED
                 self.end_experiment()
 
-        # Pause Experiment: todo
+        # Pause Experiment:
         elif event == Event.PAUSE:
             if self.app_state == State.EXPERIMENT_RUNNING:
                 self.gui.Main_Frame.toggle_pause_button()
                 self.app_state = State.EXPERIMENT_PAUSED
 
-        # Resume Experiment: todo
+        # Resume Experiment:
         elif event == Event.RESUME:
             if self.app_state == State.EXPERIMENT_PAUSED:
                 self.gui.Main_Frame.toggle_pause_button()
                 self.app_state = State.EXPERIMENT_RUNNING
 
-        # Load from Specific Stimulus Number: todo
+        # Load from Specific Stimulus Number:
         elif event == Event.SETTINGS:
             if self.app_state == State.EXPERIMENT_PAUSED or \
                     self.app_state == State.IDLE or \
                     self.app_state == State.EXPERIMENT_ENDED:
-                settings_window = Settings_Window(self.handle_event)
-                settings_window.mainloop()
+                self.settings_window = Settings_Window(self.handle_event)
+                self.settings_window.mainloop()
 
-
+        # Get Current Stim Number to Display
         elif event == Event.STIM_NUMBER:
+            # set gui variable from experiment variable
             self.gui.Main_Frame.current_stim_number = self.experiment.get_current_stim_number()
 
+        # Reset Experiment Conditions
         elif event == Event.RESET_EXPERIMENT:
             self.reset_experiment()
+            self.app_state = State.IDLE
 
+        # Set Stim Number from Settings
+        elif event == Event.SET_STIM_NUMBER:
+            # Number to set trigger audio to
+            print(self.settings_window.Main_Frame.option_var_stim.get())
 
     def load_experiment(self, selected_value):
         exp_num = selected_value.split(' ')[1]
@@ -162,17 +166,14 @@ class Controller:
         self.gui.Main_Frame.stop_experiment_timer()
         self.gui.Main_Frame.stop_update_stim_number()
 
-
-
     def reset_experiment(self):
         self.gui.Main_Frame.toggle_start_button()
         self.gui.Console_Frame.reset_console_box()
         self.gui.Main_Frame.reset_metadata_displays()
         self.gui.Main_Frame.reset_dropdown_box()
         self.experiment_loaded = False
+        self.loaded_experiment_name = 'Select an Experiment'
 
-    def get_current_stim_number(self):
-        return 0
 
 
 
@@ -189,21 +190,7 @@ class State(Enum):
     SHUTTING_DOWN = auto()
     SETTINGS_OPEN = auto()
 
-# Define the events
-class Event(Enum):
-    TDT_CONNECT = auto()
-    VR_CONNECT = auto()
-    LOAD_EXPERIMENT = auto()
-    START_WARMUP = auto()
-    END_WARMUP = auto()
-    START_EXPERIMENT = auto()
-    END_EXPERIMENT = auto()
-    RESET_EXPERIMENT = auto()
-    PAUSE = auto()
-    RESUME = auto()
-    SETTINGS = auto()
-    STIM_NUMBER = auto()
-    SETTINGS_CLOSE = auto()
+
 
 
 # ACTION FUNCTIONS ---------------------------------------------
@@ -253,6 +240,7 @@ def check_hardware_status(self):
 
     self.parent.after(500, self.check_hardware_status)
 
+# ---------------------------------------------
 def on_warmup_button_press(self):
 
     if self.parent.experiment_started:

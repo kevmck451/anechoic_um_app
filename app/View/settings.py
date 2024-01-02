@@ -5,8 +5,8 @@ import tkinter as tk
 import numpy as np
 import warnings
 
-
 import configuration
+from events import Event
 
 
 
@@ -15,7 +15,7 @@ class Settings_Window(ctk.CTk):
     def __init__(self, event_handler):
         super().__init__()
 
-        self.event_handler = event_handler
+
 
         # Computer Icon
 
@@ -31,14 +31,13 @@ class Settings_Window(ctk.CTk):
         self.minsize(configuration.settings_min_window_width, configuration.settings_min_window_height)
 
 
-        self.Main_Frame = Settings_Frame(self)
+        self.Main_Frame = Settings_Frame(self, event_handler)
         self.columnconfigure(0, weight=1)  # Left column with 2/3 of the spac
         self.rowconfigure(0, weight=1)  # Left column with 2/3 of the spac
         self.Main_Frame.grid(row=0, column=0, sticky='nsew')  # Left frame in column 0
 
         # Ending Procedures
         self.protocol("WM_DELETE_WINDOW", self.on_close)
-
 
     def on_close(self):
         # Perform any cleanup or process termination steps here
@@ -50,8 +49,10 @@ class Settings_Window(ctk.CTk):
 
 
 class Settings_Frame(ctk.CTkFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, event_handler):
         super().__init__(parent)
+
+        self.event_handler = event_handler
 
         self.playing_icon = PhotoImage(file=configuration.playing_icon_filepath)
         self.start_icon = PhotoImage(file=configuration.start_icon_filepath)
@@ -70,20 +71,20 @@ class Settings_Frame(ctk.CTkFrame):
 
         self.setting_frames(main_frame)
 
-
     def setting_frames(self, frame):
         frame.grid_rowconfigure(0, weight=1)  # Row for the load button
         frame.grid_rowconfigure(1, weight=1)  # Row for the load button
         frame.grid_rowconfigure(2, weight=1)  # Row for the load button
         frame.grid_columnconfigure(0, weight=1)  # Single column
 
+
+
         # Stimulus Dropdown Box
         dropdown_values_time_bw_samp = [f'Time bw Samples: {x} sec' for x in np.arange(0.5, 4.5, 0.5)]
         self.option_var_time_bw_samp = tk.StringVar(value=dropdown_values_time_bw_samp[3])  # Set initial value
         self.dropdown_time_bw_samp = ctk.CTkOptionMenu(frame, variable=self.option_var_time_bw_samp,
                                                        values=dropdown_values_time_bw_samp,
-                                                       font=(
-                                                       configuration.main_font_style, configuration.main_font_size),
+                                                       font=(configuration.main_font_style, configuration.main_font_size),
                                                        fg_color=configuration.dropdown_fg_color,
                                                        dropdown_hover_color=configuration.dropdown_hover_color)
         self.dropdown_time_bw_samp.grid(row=0, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2,
@@ -100,7 +101,8 @@ class Settings_Frame(ctk.CTkFrame):
 
         # Load Stim Button
         self.load_stim_button = ctk.CTkButton(frame, text='Load', font=(configuration.main_font_style, configuration.main_font_size),
-                                              fg_color=configuration.button_fg_color, hover_color=configuration.button_hover_color)
+                                              fg_color=configuration.button_fg_color, hover_color=configuration.button_hover_color,
+                                              command=lambda: self.event_handler(Event.SET_STIM_NUMBER))
         self.load_stim_button.grid(row=2, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
 

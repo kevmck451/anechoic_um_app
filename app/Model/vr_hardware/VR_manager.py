@@ -3,7 +3,7 @@ import numpy as np
 
 class VR_Headset_Hardware:
     def __init__(self):
-        print('initializing VR Hardware')
+        print('Initializing VR Hardware')
         self.headset_state = bool
 
         try:
