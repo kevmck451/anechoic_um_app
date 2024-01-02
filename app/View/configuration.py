@@ -4,6 +4,7 @@
 # Main App Settings
 window_title = 'University of Memphis | Hearing Aid Research Laboratory | Sound Localization Experiment'
 
+
 window_width = 1400
 window_height = 800
 min_window_width = 1400
@@ -24,6 +25,8 @@ stop_icon_filepath = '../docs/stop icon s.png'
 pause_icon_filepath = '../docs/pause icon s.png'
 load_icon_filepath = '../docs/load icon s.png'
 settings_icon_filepath = '../docs/settings icon s.png'
+reset_icon_filepath = '../docs/reset icon s.png'
+
 
 button_fg_color = '#578CD5' # blue
 button_hover_color = '#496FA3' # blue
@@ -52,23 +55,31 @@ connected_color = '#2B881A'
 # Warm Up
 warmup_test_color = 'gray'
 
-
 # Start / Stop
 start_fg_color="#2B881A"
 start_hover_color='#389327'
 stop_fg_color="#BD2E2E"
 stop_hover_color='#C74343'
 
-
 # Pause Frame
 pause_fg_color = '#8F8F8F'
 pause_hover_color = '#9E9E9E'
-
 
 # Settings Button
 settings_fg_color = '#4a4949'
 settings_hover_color = '#5c5b5b'
 
+# Reset Button
+reset_fg_color = '#8270E7'
+reset_hover_color = '#8F7FE9'
 
 
 
+
+# Settings Window
+settings_window_title = 'Experiment Settings'
+settings_window_width = 600
+settings_window_height = 400
+settings_min_window_width = 400
+settings_min_window_height = 200
+settings_window_icon_filepath = '../docs/settings window icon.png'

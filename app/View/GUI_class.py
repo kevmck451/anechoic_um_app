@@ -8,6 +8,7 @@ from tkinter import ttk
 
 import configuration
 from controller import Event
+from utils_exp import time_class
 
 
 
@@ -108,8 +109,15 @@ class Main_Frame(ctk.CTkFrame):
         self.event_handler = event_handler
 
         self.warmup_button_state = True
-        self.start_button_state = True
+        self.start_button_state = 0
         self.pause_button_state = True
+
+        self.update_timer_id = None
+        self.update_stim_num_id = None
+        self.update_speaker_proj_id = None
+        self.update_speaker_sel_id = None
+
+        self.current_stim_number = ''
 
         self.playing_icon = PhotoImage(file=configuration.playing_icon_filepath)
         self.start_icon = PhotoImage(file=configuration.start_icon_filepath)
@@ -117,6 +125,7 @@ class Main_Frame(ctk.CTkFrame):
         self.pause_icon = PhotoImage(file=configuration.pause_icon_filepath)
         self.load_icon = PhotoImage(file=configuration.load_icon_filepath)
         self.settings_icon = PhotoImage(file=configuration.settings_icon_filepath)
+        self.reset_icon = PhotoImage(file=configuration.reset_icon_filepath)
         warnings.filterwarnings('ignore', category=UserWarning, module='customtkinter.*')
 
         # Top Frame
@@ -143,13 +152,10 @@ class Main_Frame(ctk.CTkFrame):
         middle_frame_1.grid(row=0, column=0, padx=configuration.x_pad_1, pady=configuration.y_pad_1, sticky='nsew')
         middle_frame_2 = ctk.CTkFrame(middle_frame)
         middle_frame_2.grid(row=0, column=1, padx=configuration.x_pad_1, pady=configuration.y_pad_1, sticky='nsew')
-        # middle_frame_3 = ctk.CTkFrame(middle_frame)
-        # middle_frame_3.grid(row=0, column=2, padx=configuration.x_pad_1, pady=configuration.y_pad_1, sticky='nsew')
 
         # Configure the grid of the middle_frame
         middle_frame.grid_columnconfigure(0, weight=1, uniform='col')  # First column
         middle_frame.grid_columnconfigure(1, weight=1, uniform='col')  # Second column
-        # middle_frame.grid_columnconfigure(2, weight=1, uniform='col')  # Third column
         middle_frame.grid_rowconfigure(0, weight=1, uniform='row')
 
         # Bottom Frame
@@ -177,7 +183,6 @@ class Main_Frame(ctk.CTkFrame):
         self.select_experiment_frame(top_right_frame)
         self.warmup_frames(middle_frame_1)
         self.start_stop_frames(middle_frame_2)
-        # self.pause_frames(middle_frame_3)
         self.experiment_metadata_frames_1(bottom_left_frame)
         self.experiment_metadata_frames_2(bottom_right_frame)
 
@@ -285,42 +290,9 @@ class Main_Frame(ctk.CTkFrame):
         self.pause_button.grid(row=1, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         self.settings_button = ctk.CTkButton(frame, text='Settings', font=(configuration.main_font_style, configuration.main_font_size),
-                                        fg_color=configuration.settings_fg_color, hover_color=configuration.settings_hover_color,
+                                        fg_color=configuration.pause_fg_color, hover_color=configuration.pause_hover_color,
                                         image=self.settings_icon, command=lambda: self.event_handler(Event.SETTINGS))
         self.settings_button.grid(row=2, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
-
-    def pause_frames(self, frame):
-        frame.grid_rowconfigure(0, weight=1)  # Row for the load button
-        frame.grid_rowconfigure(1, weight=1)  # Row for the load button
-        # frame.grid_rowconfigure(2, weight=1)  # Row for the load button
-        frame.grid_columnconfigure(0, weight=1)  # Single column
-
-
-        # Stimulus Dropdown Box
-        dropdown_values_stim = [f'Stimulus Start Number: {x}' for x in range(1, 101)]
-        self.option_var_stim = tk.StringVar(value=dropdown_values_stim[0])  # Set initial value to the prompt text
-        self.dropdown_stim = ctk.CTkOptionMenu(frame, variable=self.option_var_stim, values=dropdown_values_stim,
-                                               font=(configuration.main_font_style, configuration.main_font_size),
-                                               fg_color=configuration.dropdown_fg_color, dropdown_hover_color=configuration.button_hover_color)
-        self.dropdown_stim.grid(row=0, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
-
-        self.load_stim_button = ctk.CTkButton(frame, text='Load', font=(configuration.main_font_style, configuration.main_font_size),
-                                              fg_color=configuration.button_fg_color, hover_color=configuration.button_hover_color,
-                                              image=self.load_icon, command=lambda: self.event_handler(Event.START_SPECIFIC_STIM))
-        self.load_stim_button.grid(row=1, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
-
-        # Stimulus Dropdown Box
-        dropdown_values_time_bw_samp = [f'Time bw Samples: {x} sec' for x in np.arange(0.5, 4.5, 0.5)]
-        self.option_var_time_bw_samp = tk.StringVar(
-            value=dropdown_values_time_bw_samp[3])  # Set initial value to the prompt text
-        self.dropdown_time_bw_samp = ctk.CTkOptionMenu(frame, variable=self.option_var_time_bw_samp,
-                                                       values=dropdown_values_time_bw_samp,
-                                                       font=(
-                                                           configuration.main_font_style, configuration.main_font_size),
-                                                       fg_color=configuration.dropdown_fg_color,
-                                                       dropdown_hover_color=configuration.dropdown_hover_color)
-        self.dropdown_time_bw_samp.grid(row=2, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2,
-                                        sticky='nsew')
 
     def experiment_metadata_frames_1(self, frame):
 
@@ -356,7 +328,7 @@ class Main_Frame(ctk.CTkFrame):
         self.selection_made_display = ctk.CTkLabel(frame, text='None',font=(configuration.main_font_style, configuration.main_font_size))
         self.selection_made_display.grid(row=1, column=1, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
-    # ACTIONS -------------------------------------------
+    # POP UP WINDOWS -------------------------------------------
     def manage_loading_audio_popup(self, show=False):
         if show:
             self.loading_popup = tk.Toplevel(self)
@@ -412,6 +384,7 @@ class Main_Frame(ctk.CTkFrame):
                               command=message_popup.destroy)
         ok_button.pack(pady=10)
 
+    # BUTTON TOGGLE STATES ------------------------
     def toggle_warmup_button(self):
         if self.warmup_button_state:
             self.warmup_button.configure(text="End Warmup",
@@ -429,20 +402,28 @@ class Main_Frame(ctk.CTkFrame):
             self.warmup_button_state = True
 
     def toggle_start_button(self):
-        if self.start_button_state:
+        if self.start_button_state == 0:
             self.start_button.configure(text="End Experiment",
                                                fg_color=configuration.stop_fg_color,
                                                hover_color=configuration.stop_hover_color,
                                                image=self.stop_icon,
                                                command=lambda: self.event_handler(Event.END_EXPERIMENT))
-            self.start_button_state = False
+            self.start_button_state += 1
+        elif self.start_button_state == 1:
+            self.start_button.configure(text="Reset Experiment",
+                                               fg_color=configuration.reset_fg_color,
+                                               hover_color=configuration.reset_hover_color,
+                                               image=self.reset_icon,
+                                               command=lambda: self.event_handler(Event.RESET_EXPERIMENT))
+            self.start_button_state += 1
+
         else:
             self.start_button.configure(text="Start Experiment",
-                                               fg_color=configuration.start_fg_color,
-                                               hover_color=configuration.start_hover_color,
-                                               image=self.start_icon,
-                                               command=lambda: self.event_handler(Event.START_EXPERIMENT))
-            self.start_button_state = True
+                                        fg_color=configuration.start_fg_color,
+                                        hover_color=configuration.start_hover_color,
+                                        image=self.start_icon,
+                                        command=lambda: self.event_handler(Event.START_EXPERIMENT))
+            self.start_button_state = 0
 
     def toggle_pause_button(self):
         if self.pause_button_state:
@@ -460,6 +441,7 @@ class Main_Frame(ctk.CTkFrame):
                                                command=lambda: self.event_handler(Event.PAUSE))
             self.pause_button_state = True
 
+    # RESET DISPLAYS ------------------------
     def reset_metadata_displays(self):
         self.current_stimulus_display.configure(text='None')
         self.speaker_projected_display.configure(text='None')
@@ -469,17 +451,52 @@ class Main_Frame(ctk.CTkFrame):
     def reset_dropdown_box(self):
         self.option_var_exp.set('Select an Experiment')
 
+    # UPDATE METADATA FRAMES ------------------------
     def start_experiment_timer(self):
         self.experiment_total_time_object = time_class('Experiment Total Time')
+        self.update_experiment_timer()
 
     def update_experiment_timer(self):
         time = self.experiment_total_time_object.stats()
         self.total_time_display.configure(text=time)
-        self.parent.after(500, self.update_experiment_total_time_display)
+        self.update_timer_id = self.after(250, self.update_experiment_timer)
 
     def stop_experiment_timer(self):
+        if self.update_timer_id:
+            self.after_cancel(self.update_timer_id)
+            self.update_timer_id = None
 
+    def update_stim_number(self):
+        self.event_handler(Event.STIM_NUMBER)
+        self.current_stimulus_display.configure(text=self.current_stim_number)
+        self.update_stim_num_id = self.after(250, self.update_stim_number)
 
+    def stop_update_stim_number(self):
+        if self.update_stim_num_id:
+            self.after_cancel(self.update_stim_num_id)
+            self.update_stim_num_id = None
+
+    def update_speaker_projecting_number(self):
+        text = ''
+        self.speaker_projected_display.configure(text=text)
+        self.update_speaker_proj_id = self.after(250, self.update_speaker_projecting_number)
+
+    def stop_update_speaker_projecting_number(self):
+        if self.update_speaker_proj_id:
+            self.after_cancel(self.update_speaker_proj_id)
+            self.update_speaker_proj_id = None
+
+    def update_speaker_selected_number(self):
+        text = ''
+        self.selection_made_display.configure(text=text)
+        self.update_stim_num_id = self.after(10, self.update_speaker_selected_number)
+
+    def stop_update_speaker_selected_number(self):
+        if self.update_stim_num_id:
+            self.after_cancel(self.update_stim_num_id)
+            self.update_stim_num_id = None
+
+    # SOMETHING ------------------------
 
 
 
