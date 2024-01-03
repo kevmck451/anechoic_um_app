@@ -1,9 +1,9 @@
-from audio_abstract import Audio_Abstract
-from utils import CSVFile
+from data_manager.audio_abstract import Audio_Abstract
+from csv_class import CSVFile
 import numpy as np
 import random
 
-project_base_path = '/Users/KevMcK/Dropbox/2 Work/4 Anechoic Chamber/anechoic_um_app'
+project_base_path = '..'
 
 
 # -------------------------------------------------

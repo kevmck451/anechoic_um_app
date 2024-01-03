@@ -1,6 +1,13 @@
-# Main File for App
-
-from gui_classes import App
+from Main_Window import Main_Window
+from controller import Controller
 
 if __name__ == "__main__":
-    app = App()
+
+    controller = Controller()
+    gui = Main_Window(controller.handle_event)
+
+    controller.set_gui(gui)
+
+
+    gui.mainloop()
+
