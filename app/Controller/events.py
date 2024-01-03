@@ -22,3 +22,4 @@ class Event(Enum):
     SET_STIM_NUMBER = auto()
     SET_DEFAULT_BW_TIME = auto()
     VR_INPUT = auto()
+    GET_INITIAL_TBS = auto()

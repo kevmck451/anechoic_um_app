@@ -11,7 +11,7 @@ from settings import Settings_Window
 from utilities import CSVFile_Experiment
 from utilities import CSVFile_Settings
 from events import Event
-import configuration
+from utilities import time_class
 
 class Controller:
     def __init__(self):
@@ -117,7 +117,9 @@ class Controller:
             if self.app_state == State.EXPERIMENT_PAUSED or \
                     self.app_state == State.IDLE or \
                     self.app_state == State.EXPERIMENT_ENDED:
-                self.settings_window = Settings_Window(self.handle_event)
+                init_tbs = self.settings_file.get_setting('time bw samples')
+                print(init_tbs)
+                self.settings_window = Settings_Window(self.handle_event, [init_tbs,])
                 self.settings_window.mainloop()
 
         # Get Current Stim Number to Display
@@ -166,6 +168,9 @@ class Controller:
         elif event == Event.VR_INPUT:
             # self.vr_input = vr_input
             pass
+
+        elif event == Event.GET_INITIAL_TBS:
+            self.settings_window.Main_Frame.initial_value = self.settings_file.get_setting('time bw samples')
 
     def load_experiment(self, selected_value):
         exp_num = selected_value.split(' ')[1]
@@ -269,12 +274,23 @@ class Controller:
                 channel_num = self.experiment.channel_list[self.experiment.current_index]
                 self.experiment.current_speaker_projecting = channel_num
 
+
                 if self.tdt_hardware.circuit_state == False:
                     self.tdt_hardware.trigger_audio_sample_computer(audio_sample)
 
                 else:
                     # real TDT Hardware code here
                     self.tdt_hardware.trigger_audio_sample(audio_sample, channel_num)
+
+                # Get VR Response
+                speaker_selected = 0
+                reaction_time = 0
+                num_selections = 0
+
+                self.output_file.write_row_at(int(self.experiment.current_index),
+                                              [self.experiment.current_stim_number, audio_sample.name, channel_num, speaker_selected,
+                                               reaction_time, num_selections])
+
                 time.sleep(self.settings_file.get_setting('time bw samples'))
                 self.experiment.current_index += 1
                 self.experiment.experiment_in_progress = False
