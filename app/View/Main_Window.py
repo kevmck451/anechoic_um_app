@@ -118,6 +118,8 @@ class Main_Frame(ctk.CTkFrame):
         self.update_speaker_sel_id = None
 
         self.current_stim_number = ''
+        self.current_speaker_projecting_number = ''
+        self.current_speaker_selected_number = ''
 
         self.playing_icon = PhotoImage(file=configuration.playing_icon_filepath)
         self.start_icon = PhotoImage(file=configuration.start_icon_filepath)
@@ -468,8 +470,9 @@ class Main_Frame(ctk.CTkFrame):
 
     def update_stim_number(self):
         self.event_handler(Event.STIM_NUMBER)
-        self.current_stimulus_display.configure(text=self.current_stim_number)
-        self.update_stim_num_id = self.after(250, self.update_stim_number)
+        stim_num = self.current_stim_number
+        self.current_stimulus_display.configure(text=stim_num)
+        self.update_stim_num_id = self.after(10, self.update_stim_number)
 
     def stop_update_stim_number(self):
         if self.update_stim_num_id:
@@ -477,9 +480,10 @@ class Main_Frame(ctk.CTkFrame):
             self.update_stim_num_id = None
 
     def update_speaker_projecting_number(self):
-        text = ''
+        self.event_handler(Event.CHANNEL_NUMBER)
+        text = self.current_speaker_projecting_number
         self.speaker_projected_display.configure(text=text)
-        self.update_speaker_proj_id = self.after(250, self.update_speaker_projecting_number)
+        self.update_speaker_proj_id = self.after(10, self.update_speaker_projecting_number)
 
     def stop_update_speaker_projecting_number(self):
         if self.update_speaker_proj_id:
@@ -487,14 +491,15 @@ class Main_Frame(ctk.CTkFrame):
             self.update_speaker_proj_id = None
 
     def update_speaker_selected_number(self):
-        text = ''
+        self.event_handler(Event.CHANNEL_SEL_NUMBER)
+        text = self.current_speaker_selected_number
         self.selection_made_display.configure(text=text)
-        self.update_stim_num_id = self.after(10, self.update_speaker_selected_number)
+        self.update_speaker_sel_id = self.after(10, self.update_speaker_selected_number)
 
     def stop_update_speaker_selected_number(self):
-        if self.update_stim_num_id:
-            self.after_cancel(self.update_stim_num_id)
-            self.update_stim_num_id = None
+        if self.update_speaker_sel_id:
+            self.after_cancel(self.update_speaker_sel_id)
+            self.update_speaker_sel_id = None
 
     # SOMETHING ------------------------
 

@@ -1,11 +1,12 @@
 # from tdt import DSPProject
 import numpy as np
 import sounddevice as sd
+import time
 
 
 class TDT_Circuit:
     def __init__(self):
-        print('Initializing TDT Hardware')
+
         # random = np.random.choice([True, False])
         # if random: self.circuit_state = True
         # else: self.circuit_state = False
@@ -15,6 +16,7 @@ class TDT_Circuit:
 
 
     def connect_hardware(self):
+        print('Initializing TDT Hardware')
         try:
             project = DSPProject()
             self.circuit = project.load_circuit(
@@ -35,10 +37,10 @@ class TDT_Circuit:
             self.circuit_state = False
 
 
-    def trigger_audio_sample_computer(self, audio_sample, channel):
+    def trigger_audio_sample_computer(self, audio_sample):
         sd.play(audio_sample.data, audio_sample.sample_rate)
-        sd.wait()
-
+        time.sleep(audio_sample.sample_length)
+        # sd.wait()
 
 
     def trigger_audio_sample(self, audio_sample, channel):
@@ -47,7 +49,8 @@ class TDT_Circuit:
         speaker_buffer.set(audio_sample.data)
 
         self.circuit.set_tag("chan", channel)
-
         self.circuit.trigger(trigger=1)
+
+        time.sleep(audio_sample.sample_length)
 
 

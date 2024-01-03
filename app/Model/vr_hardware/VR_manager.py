@@ -3,10 +3,11 @@ import numpy as np
 
 class VR_Headset_Hardware:
     def __init__(self):
-        print('Initializing VR Hardware')
+
         self.headset_state = False
 
     def connect(self):
+        print('Initializing VR Hardware')
         try:
             # connect to headset
             self.headset_state = True

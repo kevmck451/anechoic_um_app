@@ -16,6 +16,8 @@ class Event(Enum):
     RESUME = auto()
     SETTINGS = auto()
     STIM_NUMBER = auto()
+    CHANNEL_NUMBER = auto()
+    CHANNEL_SEL_NUMBER = auto()
     SETTINGS_CLOSE = auto()
     SET_STIM_NUMBER = auto()
     SET_DEFAULT_BW_TIME = auto()

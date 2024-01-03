@@ -1,6 +1,7 @@
 
 from enum import Enum, auto
 from threading import Thread
+import time
 
 from TDT_manager import TDT_Circuit
 from VR_manager import VR_Headset_Hardware
@@ -22,6 +23,7 @@ class Controller:
         self.vr_hardware = VR_Headset_Hardware()
         self.experiment = Experiment()
         self.warmup = Experiment()
+        self.stop_flag_raised = False
 
     def set_gui(self, gui):
         self.gui = gui
@@ -66,7 +68,8 @@ class Controller:
         # END Warmup:
         elif event == Event.END_WARMUP:
             if self.app_state == State.WARMUP_RUNNING:
-                self.end_warmup()
+                self.stop_flag_raised = True
+                # self.end_warmup()
                 self.app_state = State.IDLE
 
         # Start Experiment:
@@ -114,9 +117,25 @@ class Controller:
         elif event == Event.STIM_NUMBER:
             # set gui variable from experiment variable
             if self.app_state == State.WARMUP_RUNNING:
-                self.gui.Main_Frame.current_stim_number = self.warmup.get_current_stim_number()
+                self.gui.Main_Frame.current_stim_number = self.warmup.current_stim_number
             elif self.app_state == State.EXPERIMENT_RUNNING:
-                self.gui.Main_Frame.current_stim_number = self.experiment.get_current_stim_number()
+                self.gui.Main_Frame.current_stim_number = self.experiment.current_stim_number
+
+        # Get Current Channel Number to Display
+        elif event == Event.CHANNEL_NUMBER:
+            # set gui variable from experiment variable
+            if self.app_state == State.WARMUP_RUNNING:
+                self.gui.Main_Frame.current_speaker_projecting_number = self.warmup.current_speaker_projecting
+            elif self.app_state == State.EXPERIMENT_RUNNING:
+                self.gui.Main_Frame.current_speaker_projecting_number = self.experiment.current_speaker_projecting
+
+        # Get Current Channel Selected to Display
+        elif event == Event.CHANNEL_SEL_NUMBER:
+            # set gui variable from experiment variable
+            if self.app_state == State.WARMUP_RUNNING:
+                self.gui.Main_Frame.current_speaker_selected_number = self.warmup.current_speaker_selected
+            elif self.app_state == State.EXPERIMENT_RUNNING:
+                self.gui.Main_Frame.current_speaker_selected_number = self.experiment.current_speaker_selected
 
         # Reset Experiment Conditions
         elif event == Event.RESET_EXPERIMENT:
@@ -154,41 +173,57 @@ class Controller:
         self.gui.Main_Frame.toggle_warmup_button()
         warmup_audio, warmup_channels = circuit_data.load_warmup_data()
         self.warmup.set_audio_channel_list(warmup_audio, warmup_channels)
-        self.warmup.experiment_in_progress = True
+        self.warmup.experiment_in_progress = False
 
+        self.warmup.current_index = 0
+        self.warmup.max_index = 4
+        self.warmup.update_current_stim_number(self.warmup.current_index)
+        self.gui.Main_Frame.update_stim_number()
+        self.gui.Main_Frame.update_speaker_projecting_number()
+        self.gui.Main_Frame.update_speaker_selected_number()
+        task_thread = Thread(target=self.perform_warmup_round, daemon=True)
+        task_thread.start()
 
-        stim_number = 0
-        # trigger audio for stim 0
-        self.warmup.update_current_stim_number(stim_number)
-        self.warmup.audio_sample_list[stim_number]
-        self.warmup.channel_list[stim_number]
-
-
-
-
-        if self.tdt_hardware.circuit_state == False:
-            pass
-
-        else:
-            # real TDT Hardware code here
-            pass
-
-
-
-
-        # task_thread = Thread(target=self.trigger_warmup_audio_samples)
-        # task_thread.start()
 
     def perform_warmup_round(self):
+        while self.warmup.current_index <= self.warmup.max_index:
+            if self.warmup.experiment_in_progress == False:
+                self.warmup.experiment_in_progress = True
 
+                audio_sample = self.warmup.audio_sample_list[self.warmup.current_index]
+                channel_num = self.warmup.channel_list[self.warmup.current_index]
+                self.warmup.current_speaker_projecting = channel_num
 
+                if self.tdt_hardware.circuit_state == False:
+                    self.tdt_hardware.trigger_audio_sample_computer(audio_sample)
 
+                else:
+                    # real TDT Hardware code here
+                    self.tdt_hardware.trigger_audio_sample(audio_sample, channel_num)
 
-        self.warmup.experiment_in_progress = False
+                # time.sleep(audio_sample.sample_length)
+                time.sleep(1)
+                self.warmup.current_index += 1
+                if self.warmup.current_index < 6:
+                    self.warmup.update_current_stim_number(self.warmup.current_index)
+                self.warmup.experiment_in_progress = False
+            if self.stop_flag_raised: break
+
+        self.end_warmup()
 
 
     def end_warmup(self):
+        self.warmup.current_index = ''
+        self.warmup.current_speaker_projecting = ''
+        self.warmup.current_speaker_selected = ''
+        self.gui.Main_Frame.stop_update_stim_number()
+        self.gui.Main_Frame.stop_update_speaker_projecting_number()
+        self.gui.Main_Frame.stop_update_speaker_selected_number()
         self.gui.Main_Frame.toggle_warmup_button()
+        self.stop_flag_raised = False
+        self.gui.Main_Frame.reset_metadata_displays()
+        self.app_state = State.IDLE
+
 
     def start_experiment(self):
         self.gui.Main_Frame.toggle_start_button()
