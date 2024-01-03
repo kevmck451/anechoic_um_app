@@ -21,3 +21,4 @@ class Event(Enum):
     SETTINGS_CLOSE = auto()
     SET_STIM_NUMBER = auto()
     SET_DEFAULT_BW_TIME = auto()
+    VR_INPUT = auto()

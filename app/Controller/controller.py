@@ -8,6 +8,8 @@ from VR_manager import VR_Headset_Hardware
 from data_manager import circuit_data
 from experiment_state import Experiment
 from settings import Settings_Window
+from utilities import CSVFile_Experiment
+from utilities import CSVFile_Settings
 from events import Event
 import configuration
 
@@ -24,6 +26,8 @@ class Controller:
         self.experiment = Experiment()
         self.warmup = Experiment()
         self.stop_flag_raised = False
+        self.pause_flag_raised = False
+        self.settings_file = CSVFile_Settings()
 
     def set_gui(self, gui):
         self.gui = gui
@@ -91,19 +95,22 @@ class Controller:
                 if self.gui.Main_Frame.pause_button_state == False:
                     self.gui.Main_Frame.toggle_pause_button()
                 self.app_state = State.EXPERIMENT_ENDED
-                self.end_experiment()
+                self.stop_flag_raised = True
+                # self.end_experiment()
 
         # Pause Experiment:
         elif event == Event.PAUSE:
             if self.app_state == State.EXPERIMENT_RUNNING:
                 self.gui.Main_Frame.toggle_pause_button()
                 self.app_state = State.EXPERIMENT_PAUSED
+                self.pause_flag_raised = True
 
         # Resume Experiment:
         elif event == Event.RESUME:
             if self.app_state == State.EXPERIMENT_PAUSED:
                 self.gui.Main_Frame.toggle_pause_button()
                 self.app_state = State.EXPERIMENT_RUNNING
+                self.pause_flag_raised = False
 
         # Load from Specific Stimulus Number:
         elif event == Event.SETTINGS:
@@ -144,19 +151,27 @@ class Controller:
 
         # Set Stim Number from Settings
         elif event == Event.SET_STIM_NUMBER:
-            # Number to set trigger audio to
-            print(self.settings_window.Main_Frame.option_var_stim.get())
+            value = self.settings_window.Main_Frame.option_var_stim.get()
+            value = int(value.split(':')[1].strip())
+            self.experiment.current_index = value - 1
+            self.experiment.update_current_stim_number(self.experiment.current_index)
 
         # Set default time between samples value
         elif event == Event.SET_DEFAULT_BW_TIME:
             # get value selected and set default
-            configuration.set_default_time_bw_samples_value(self.settings_window.Main_Frame.option_var_time_bw_samp.get())
+            value = self.settings_window.Main_Frame.option_var_time_bw_samp.get()
+            value = float(value.split(':')[1].strip().split(' ')[0])
+            self.settings_file.set_default_setting('time bw samples', value)
+
+        elif event == Event.VR_INPUT:
+            # self.vr_input = vr_input
+            pass
 
     def load_experiment(self, selected_value):
         exp_num = selected_value.split(' ')[1]
         self.sample_names_list = circuit_data.load_audio_names(exp_num)
         self.gui.Main_Frame.manage_loading_audio_popup(show=True)
-        load_thread = Thread(target=self.load_audio_samples, args=exp_num, daemon=True)
+        load_thread = Thread(target=self.load_audio_samples, args=(exp_num,), daemon=True)
         load_thread.start()
 
     def load_audio_samples(self, experiment_id):
@@ -184,7 +199,6 @@ class Controller:
         task_thread = Thread(target=self.perform_warmup_round, daemon=True)
         task_thread.start()
 
-
     def perform_warmup_round(self):
         while self.warmup.current_index <= self.warmup.max_index:
             if self.warmup.experiment_in_progress == False:
@@ -201,8 +215,7 @@ class Controller:
                     # real TDT Hardware code here
                     self.tdt_hardware.trigger_audio_sample(audio_sample, channel_num)
 
-                # time.sleep(audio_sample.sample_length)
-                time.sleep(1)
+                time.sleep(self.settings_file.get_setting('time bw samples'))
                 self.warmup.current_index += 1
                 if self.warmup.current_index < 6:
                     self.warmup.update_current_stim_number(self.warmup.current_index)
@@ -210,7 +223,6 @@ class Controller:
             if self.stop_flag_raised: break
 
         self.end_warmup()
-
 
     def end_warmup(self):
         self.warmup.current_index = ''
@@ -224,23 +236,62 @@ class Controller:
         self.gui.Main_Frame.reset_metadata_displays()
         self.app_state = State.IDLE
 
-
     def start_experiment(self):
-        self.gui.Main_Frame.toggle_start_button()
         self.app_state = State.EXPERIMENT_RUNNING
+        self.gui.Main_Frame.toggle_start_button()
+        selected_value = self.gui.Main_Frame.option_var_exp.get().split(' ')[1]
+        self.output_file = CSVFile_Experiment(selected_value)
+        self.warmup.set_audio_channel_list(self.audio_samples_list, self.channel_list)
+        self.experiment.experiment_in_progress = False
+
+        self.experiment.current_index = 0
+        self.experiment.max_index = 99
+        self.experiment.update_current_stim_number(self.experiment.current_index)
         self.gui.Main_Frame.start_experiment_timer()
-
-
-
         self.gui.Main_Frame.update_stim_number()
+        self.gui.Main_Frame.update_speaker_projecting_number()
+        self.gui.Main_Frame.update_speaker_selected_number()
+        task_thread = Thread(target=self.perform_experiment_rounds, daemon=True)
+        task_thread.start()
 
+    def perform_experiment_rounds(self):
+        while self.experiment.current_index <= self.experiment.max_index:
+            if self.experiment.experiment_in_progress == False:
+                if self.experiment.current_index < 101:
+                    self.experiment.update_current_stim_number(self.experiment.current_index)
+                self.experiment.experiment_in_progress = True
 
-        # Thread to Start Procedure
+                audio_sample = self.experiment.audio_sample_list[self.experiment.current_index]
+                channel_num = self.experiment.channel_list[self.experiment.current_index]
+                self.experiment.current_speaker_projecting = channel_num
+
+                if self.tdt_hardware.circuit_state == False:
+                    self.tdt_hardware.trigger_audio_sample_computer(audio_sample)
+
+                else:
+                    # real TDT Hardware code here
+                    self.tdt_hardware.trigger_audio_sample(audio_sample, channel_num)
+                time.sleep(self.settings_file.get_setting('time bw samples'))
+                self.experiment.current_index += 1
+                self.experiment.experiment_in_progress = False
+            if self.pause_flag_raised:
+                self.pause_experiment()
+            if self.stop_flag_raised: break
+
+        self.end_experiment()
 
     def end_experiment(self):
-        self.gui.Main_Frame.toggle_start_button()
+        self.app_state = State.EXPERIMENT_ENDED
+        self.experiment.current_index = ''
+        self.experiment.current_speaker_projecting = ''
+        self.experiment.current_speaker_selected = ''
         self.gui.Main_Frame.stop_experiment_timer()
         self.gui.Main_Frame.stop_update_stim_number()
+        self.gui.Main_Frame.stop_update_speaker_projecting_number()
+        self.gui.Main_Frame.stop_update_speaker_selected_number()
+        self.gui.Main_Frame.toggle_start_button()
+        self.stop_flag_raised = False
+        self.pause_flag_raised = False
 
     def reset_experiment(self):
         self.gui.Main_Frame.toggle_start_button()
@@ -249,8 +300,11 @@ class Controller:
         self.gui.Main_Frame.reset_dropdown_box()
         self.experiment_loaded = False
         self.loaded_experiment_name = 'Select an Experiment'
+        self.gui.Main_Frame.reset_metadata_displays()
 
-
+    def pause_experiment(self):
+        while self.pause_flag_raised and self.app_state == State.EXPERIMENT_PAUSED:
+            time.sleep(0.1)
 
 
 # Define the states using an enumeration

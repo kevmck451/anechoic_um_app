@@ -116,6 +116,7 @@ class Main_Frame(ctk.CTkFrame):
         self.update_stim_num_id = None
         self.update_speaker_proj_id = None
         self.update_speaker_sel_id = None
+        self.update_test_displays_id = None
 
         self.current_stim_number = ''
         self.current_speaker_projecting_number = ''
@@ -461,7 +462,7 @@ class Main_Frame(ctk.CTkFrame):
     def update_experiment_timer(self):
         time = self.experiment_total_time_object.stats()
         self.total_time_display.configure(text=time)
-        self.update_timer_id = self.after(250, self.update_experiment_timer)
+        self.update_timer_id = self.after(100, self.update_experiment_timer)
 
     def stop_experiment_timer(self):
         if self.update_timer_id:
@@ -472,7 +473,7 @@ class Main_Frame(ctk.CTkFrame):
         self.event_handler(Event.STIM_NUMBER)
         stim_num = self.current_stim_number
         self.current_stimulus_display.configure(text=stim_num)
-        self.update_stim_num_id = self.after(10, self.update_stim_number)
+        self.update_stim_num_id = self.after(100, self.update_stim_number)
 
     def stop_update_stim_number(self):
         if self.update_stim_num_id:
@@ -483,7 +484,7 @@ class Main_Frame(ctk.CTkFrame):
         self.event_handler(Event.CHANNEL_NUMBER)
         text = self.current_speaker_projecting_number
         self.speaker_projected_display.configure(text=text)
-        self.update_speaker_proj_id = self.after(10, self.update_speaker_projecting_number)
+        self.update_speaker_proj_id = self.after(100, self.update_speaker_projecting_number)
 
     def stop_update_speaker_projecting_number(self):
         if self.update_speaker_proj_id:
@@ -494,14 +495,29 @@ class Main_Frame(ctk.CTkFrame):
         self.event_handler(Event.CHANNEL_SEL_NUMBER)
         text = self.current_speaker_selected_number
         self.selection_made_display.configure(text=text)
-        self.update_speaker_sel_id = self.after(10, self.update_speaker_selected_number)
+        self.update_speaker_sel_id = self.after(100, self.update_speaker_selected_number)
 
     def stop_update_speaker_selected_number(self):
         if self.update_speaker_sel_id:
             self.after_cancel(self.update_speaker_sel_id)
             self.update_speaker_sel_id = None
 
-    # SOMETHING ------------------------
+    # WARM UP TEST VIEWS ------------------------
+
+    def update_warmup_test_displays(self):
+        self.event_handler(Event.VR_INPUT)
+        # selection = self.something
+        stim_num = self.current_stim_number
+
+        self.warmup_test_1.configure(bg_color=configuration.settings_fg_color)
+        self.warmup_test_1.configure(bg_color=configuration.settings_fg_color)
+
+        self.current_stimulus_display.configure(text=stim_num)
+        self.update_stim_num_id = self.after(100, self.update_stim_number)
+
+def stop_update_warmup_test_displays(self):
+
+        pass
 
 
 

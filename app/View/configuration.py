@@ -72,10 +72,7 @@ settings_min_window_width = 400
 settings_min_window_height = 200
 settings_window_icon_filepath = '../docs/settings window icon.png'
 
-# Saved Settings
-def set_default_time_bw_samples_value(time):
-    # write new value to file
-    pass
+
 
 
 

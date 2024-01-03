@@ -17,6 +17,7 @@ class Experiment:
         self.reaction_time = int
         self.max_index = int
 
+
     def get_current_stim_number(self):
         return self.current_stim_number
 
