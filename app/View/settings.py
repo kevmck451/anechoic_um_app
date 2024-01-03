@@ -1,5 +1,4 @@
 from tkinter import PhotoImage
-from PIL import Image, ImageTk
 import customtkinter as ctk
 import tkinter as tk
 import numpy as np
@@ -12,10 +11,8 @@ from events import Event
 
 # Settings Window
 class Settings_Window(ctk.CTk):
-    def __init__(self, event_handler):
+    def __init__(self, event_handler, initial_values):
         super().__init__()
-
-
 
         # Computer Icon
 
@@ -31,7 +28,7 @@ class Settings_Window(ctk.CTk):
         self.minsize(configuration.settings_min_window_width, configuration.settings_min_window_height)
 
 
-        self.Main_Frame = Settings_Frame(self, event_handler)
+        self.Main_Frame = Settings_Frame(self, event_handler, initial_values)
         self.columnconfigure(0, weight=1)  # Left column with 2/3 of the spac
         self.rowconfigure(0, weight=1)  # Left column with 2/3 of the spac
         self.Main_Frame.grid(row=0, column=0, sticky='nsew')  # Left frame in column 0
@@ -49,10 +46,11 @@ class Settings_Window(ctk.CTk):
 
 
 class Settings_Frame(ctk.CTkFrame):
-    def __init__(self, parent, event_handler):
+    def __init__(self, parent, event_handler, initial_values):
         super().__init__(parent)
 
         self.event_handler = event_handler
+        self.initial_value = initial_values
 
         self.playing_icon = PhotoImage(file=configuration.playing_icon_filepath)
         self.start_icon = PhotoImage(file=configuration.start_icon_filepath)
@@ -78,11 +76,16 @@ class Settings_Frame(ctk.CTkFrame):
         frame.grid_rowconfigure(3, weight=1)  # Row for the load button
         frame.grid_columnconfigure(0, weight=1)  # Single column
 
-
-
         # Stimulus Dropdown Box
-        dropdown_values_time_bw_samp = [f'Time bw Samples: {x} sec' for x in np.arange(0.5, 4.5, 0.5)]
-        self.option_var_time_bw_samp = tk.StringVar(value=dropdown_values_time_bw_samp[3])  # Set initial value
+        dropdown_values_time_bw_samp = [f'Time bw Samples: {x} sec' for x in np.arange(0, 4.5, 0.5)]
+        value_list = [x for x in np.arange(0, 4.5, 0.5)]
+        init_index = 0
+        for i, value in enumerate(value_list):
+            # print(str(self.initial_value[0]), str(value))
+            if str(self.initial_value[0]) == str(value):
+                init_index = i
+
+        self.option_var_time_bw_samp = tk.StringVar(value=dropdown_values_time_bw_samp[init_index])  # Set initial value
         self.dropdown_time_bw_samp = ctk.CTkOptionMenu(frame, variable=self.option_var_time_bw_samp,
                                                        values=dropdown_values_time_bw_samp,
                                                        font=(configuration.main_font_style, configuration.main_font_size),

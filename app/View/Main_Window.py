@@ -7,7 +7,7 @@ from tkinter import ttk
 
 import configuration
 from controller import Event
-from utils_exp import time_class
+from utilities import time_class
 
 
 
@@ -572,7 +572,6 @@ class Main_Frame(ctk.CTkFrame):
 
         self.previous_group_state = self.console_frame.group_number
         self.update_console_displays_id = self.after(100, self.update_console_display)
-
 
     def stop_update_console_display(self):
         if self.update_console_displays_id:
