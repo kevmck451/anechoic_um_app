@@ -5,7 +5,7 @@ from enum import Enum, auto
 # Define the events
 class Event(Enum):
     TDT_CONNECT = auto()
-    VR_CONNECT = auto()
+
     LOAD_EXPERIMENT = auto()
     START_WARMUP = auto()
     END_WARMUP = auto()
@@ -23,3 +23,6 @@ class Event(Enum):
     SET_DEFAULT_BW_TIME = auto()
     VR_INPUT = auto()
     GET_INITIAL_TBS = auto()
+    VR_CONNECTION = auto()
+    VR_CONNECT = auto()
+    VR_DISCONNECT = auto()

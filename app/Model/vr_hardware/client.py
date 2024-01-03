@@ -31,14 +31,14 @@ def main():
         print("Connected to the server successfully.")
 
         # Create threads for sending and receiving messages
-        send_thread = Thread(target=send_messages, args=(client_socket,))
-        receive_thread = Thread(target=receive_messages, args=(client_socket,))
-
-        receive_thread.start()
-        send_thread.start()
-
-        receive_thread.join()
-        send_thread.join()
+        # send_thread = Thread(target=send_messages, args=(client_socket,))
+        # receive_thread = Thread(target=receive_messages, args=(client_socket,))
+        #
+        # receive_thread.start()
+        # send_thread.start()
+        #
+        # receive_thread.join()
+        # send_thread.join()
 
     except Exception as e:
         print(f"Failed to connect to the server: {e}")
@@ -49,4 +49,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
 

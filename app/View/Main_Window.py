@@ -14,6 +14,7 @@ from utilities import time_class
 class Main_Window(ctk.CTk):
     def __init__(self, event_handler):
         super().__init__()
+        self.event_handler = event_handler
 
         # Computer Icon
         img = Image.open('../docs/harl_logo.png')
@@ -32,7 +33,7 @@ class Main_Window(ctk.CTk):
         self.minsize(configuration.min_window_width, configuration.min_window_height)
 
         self.Console_Frame = Console_Frame(self)
-        self.Main_Frame = Main_Frame(self, self.Console_Frame, event_handler)
+        self.Main_Frame = Main_Frame(self, self.Console_Frame, self.event_handler)
 
         # Grid configuration
         self.columnconfigure(0, weight=1)  # Left column with 2/3 of the space
@@ -115,6 +116,7 @@ class Main_Frame(ctk.CTkFrame):
         self.start_button_state = 0
         self.pause_button_state = True
         self.previous_group_state = 0
+        self.vr_button_state = 0
 
         self.update_timer_id = None
         self.update_stim_num_id = None
@@ -122,11 +124,13 @@ class Main_Frame(ctk.CTkFrame):
         self.update_speaker_sel_id = None
         self.update_test_displays_id = None
         self.update_console_displays_id = None
+        self.vr_hardware_id = None
 
 
         self.current_stim_number = ''
         self.current_speaker_projecting_number = ''
         self.current_speaker_selected_number = ''
+        self.vr_connection = bool
 
         self.playing_icon = PhotoImage(file=configuration.playing_icon_filepath)
         self.playing_icon_s = PhotoImage(file=configuration.playing_icon_s_filepath)
@@ -210,10 +214,10 @@ class Main_Frame(ctk.CTkFrame):
         self.tdt_status.grid(row=0, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         # TDT Reset Button
-        self.reset_button_TDT = ctk.CTkButton(frame, text='Connect',
+        self.TDT_button = ctk.CTkButton(frame, text='Connect',
                                               font=(configuration.main_font_style, configuration.main_font_size),
                                               fg_color=configuration.button_fg_color, command=lambda: self.event_handler(Event.TDT_CONNECT))
-        self.reset_button_TDT.grid(row=0, column=1, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
+        self.TDT_button.grid(row=0, column=1, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         # VR Connection Status
         self.vr_status = ctk.CTkLabel(frame, text=configuration.connection_status_VR, text_color=configuration.not_connected_color,
@@ -221,10 +225,10 @@ class Main_Frame(ctk.CTkFrame):
         self.vr_status.grid(row=1, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
         # VR Reset Button
-        self.reset_button_VR = ctk.CTkButton(frame, text='Connect',
+        self.VR_button = ctk.CTkButton(frame, text='Connect',
                                              font=(configuration.main_font_style, configuration.main_font_size),
                                              fg_color=configuration.button_fg_color, command=lambda: self.event_handler(Event.VR_CONNECT))
-        self.reset_button_VR.grid(row=1, column=1, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
+        self.VR_button.grid(row=1, column=1, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
     def select_experiment_frame(self, frame):
         # Configure the grid for the frame
@@ -339,7 +343,7 @@ class Main_Frame(ctk.CTkFrame):
         self.selection_made_display.grid(row=1, column=1, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
     # POP UP WINDOWS -------------------------------------------
-    def manage_loading_audio_popup(self, show=False):
+    def manage_loading_audio_popup(self, text, show=False):
         if show:
             self.loading_popup = tk.Toplevel(self)
             self.loading_popup.title("Loading")
@@ -350,7 +354,7 @@ class Main_Frame(ctk.CTkFrame):
             center_x = int((screen_width / 2) - (window_width / 2))
             center_y = int((screen_height / 2) - (window_height / 2))
             self.loading_popup.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
-            tk.Label(self.loading_popup, text="Loading audio samples, please wait...", font=("default_font", 20)).pack(
+            tk.Label(self.loading_popup, text=text, font=("default_font", 20)).pack(
                 pady=10)
             # Configure style for a larger progress bar
             style = ttk.Style(self.loading_popup)
@@ -373,7 +377,7 @@ class Main_Frame(ctk.CTkFrame):
                 self.loading_popup.destroy()
 
     def close_loading_popup(self):
-        self.manage_loading_audio_popup(show=False)
+        self.manage_loading_audio_popup(text='', show=False)
 
     def warning_popup_general(self, message):
         message_popup = tk.Toplevel(self)
@@ -577,3 +581,42 @@ class Main_Frame(ctk.CTkFrame):
         if self.update_console_displays_id:
             self.after_cancel(self.update_console_displays_id)
             self.update_console_displays_id = None
+
+    # VR HARDWARE VIEWS
+    def vr_hardware_connection_status(self):
+        # self.event_handler(Event.VR_CONNECTION)
+        #
+        # if self.vr_button_state
+        #
+        # self.vr_hardware_id = self.after(1000, self.vr_hardware_connection_status)
+        pass
+
+    def stop_vr_hardware_connection_status(self):
+        if self.vr_hardware_id:
+            self.after_cancel(self.vr_hardware_id)
+            self.vr_hardware_id = None
+
+    def toggle_vr_button(self):
+        if self.vr_button_state == 0:
+            self.vr_status.configure(text=configuration.connection_status_VR_C,
+                                     text_color=configuration.connected_color)
+            self.VR_button.configure(text='Disconnect',
+                                     fg_color=configuration.stop_fg_color, hover_color=configuration.stop_hover_color,
+                                     command=lambda: self.event_handler(Event.VR_DISCONNECT))
+            self.vr_button_state += 1
+        # elif self.vr_button_state == 1:
+        #     self.vr_status.configure(text=configuration.connection_status_VR,
+        #                                  text_color=configuration.not_connected_color)
+        #     self.VR_button.configure(text='Connect',
+        #                              fg_color=configuration.start_fg_color, hover_color=configuration.start_hover_color,
+        #                              command=lambda: self.event_handler(Event.VR_CONNECT))
+        #     self.vr_button_state += 1
+
+        else:
+            self.vr_status.configure(text=configuration.connection_status_VR,
+                                     text_color=configuration.not_connected_color)
+            self.VR_button.configure(text='Connect',
+                                     fg_color=configuration.button_fg_color, hover_color=configuration.button_hover_color,
+                                     command=lambda: self.event_handler(Event.VR_CONNECT))
+            self.vr_button_state = 0
+
