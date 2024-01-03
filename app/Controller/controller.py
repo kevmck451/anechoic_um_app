@@ -196,6 +196,8 @@ class Controller:
         self.gui.Main_Frame.update_stim_number()
         self.gui.Main_Frame.update_speaker_projecting_number()
         self.gui.Main_Frame.update_speaker_selected_number()
+        self.gui.Main_Frame.update_warmup_test_displays()
+
         task_thread = Thread(target=self.perform_warmup_round, daemon=True)
         task_thread.start()
 
@@ -231,6 +233,8 @@ class Controller:
         self.gui.Main_Frame.stop_update_stim_number()
         self.gui.Main_Frame.stop_update_speaker_projecting_number()
         self.gui.Main_Frame.stop_update_speaker_selected_number()
+        self.gui.Main_Frame.stop_update_warmup_test_displays()
+        self.gui.Main_Frame.reset_warmup_tests()
         self.gui.Main_Frame.toggle_warmup_button()
         self.stop_flag_raised = False
         self.gui.Main_Frame.reset_metadata_displays()
@@ -243,7 +247,6 @@ class Controller:
         self.output_file = CSVFile_Experiment(selected_value)
         self.warmup.set_audio_channel_list(self.audio_samples_list, self.channel_list)
         self.experiment.experiment_in_progress = False
-
         self.experiment.current_index = 0
         self.experiment.max_index = 99
         self.experiment.update_current_stim_number(self.experiment.current_index)
@@ -251,6 +254,7 @@ class Controller:
         self.gui.Main_Frame.update_stim_number()
         self.gui.Main_Frame.update_speaker_projecting_number()
         self.gui.Main_Frame.update_speaker_selected_number()
+        self.gui.Main_Frame.update_console_display()
         task_thread = Thread(target=self.perform_experiment_rounds, daemon=True)
         task_thread.start()
 
@@ -289,6 +293,7 @@ class Controller:
         self.gui.Main_Frame.stop_update_stim_number()
         self.gui.Main_Frame.stop_update_speaker_projecting_number()
         self.gui.Main_Frame.stop_update_speaker_selected_number()
+        self.gui.Main_Frame.stop_update_console_display()
         self.gui.Main_Frame.toggle_start_button()
         self.stop_flag_raised = False
         self.pause_flag_raised = False

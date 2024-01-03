@@ -16,6 +16,7 @@ main_font_style = "default_font"
 main_font_size = 26
 
 playing_icon_filepath = '../docs/playing icon s.png'
+playing_icon_s_filepath = '../docs/playing icon ss.png'
 start_icon_filepath = '../docs/start icon s.png'
 stop_icon_filepath = '../docs/stop icon s.png'
 pause_icon_filepath = '../docs/pause icon s.png'
@@ -45,6 +46,9 @@ connected_color = '#2B881A'
 
 # Warm Up
 warmup_test_color = 'gray'
+warmup_neutral_bg_color = '#DBDBDB'
+warmup_playing_bg_color = '#B8B9B8'
+
 
 # Start / Stop
 start_fg_color="#2B881A"

@@ -59,6 +59,8 @@ class Console_Frame(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent)
 
+        self.group_number = 0
+
         # Main Frame
         main_frame = ctk.CTkFrame(self)
         main_frame.grid(padx=configuration.x_pad_main, pady=configuration.y_pad_main, sticky='nsew')
@@ -88,18 +90,19 @@ class Console_Frame(ctk.CTkFrame):
         self.main_info_label.configure(text=f"Sample Audio Order: Experiment {experiment}")
         for i, data in enumerate(new_data):
             if i + 1 == number:
-                self.stim_labels[i].configure(text=f"Stim {number}: {str(data).title()}", text_color=text_color,
+                self.stim_labels[i].configure(text=f"Stim {number}: {str(data).title()} ", text_color=text_color,
                                                bg_color='#B8B9B8')
             elif bg_color is not None:
-                self.stim_labels[i].configure(text=f"Stim {i + 1}: {str(data).title()}", text_color='black',
+                self.stim_labels[i].configure(text=f"Stim {i + 1}: {str(data).title()} ", text_color='black',
                                                bg_color=bg_color)
             else:
-                self.stim_labels[i].configure(text=f"Stim {i + 1}: {str(data).title()}", text_color='black')
+                self.stim_labels[i].configure(text=f"Stim {i + 1}: {str(data).title()} ", text_color='black')
 
     def reset_console_box(self):
         self.main_info_label.configure(text="Sample Audio Order:")
         for i, label in enumerate(self.stim_labels):
-            label.configure(text=f"Stim {i + 1}:", text_color='black', bg_color='#CFCFCF')
+            label.configure(text=f"Stim {i + 1}:", text_color='black', bg_color='#CFCFCF', image='')
+
 
 
 class Main_Frame(ctk.CTkFrame):
@@ -111,18 +114,22 @@ class Main_Frame(ctk.CTkFrame):
         self.warmup_button_state = True
         self.start_button_state = 0
         self.pause_button_state = True
+        self.previous_group_state = 0
 
         self.update_timer_id = None
         self.update_stim_num_id = None
         self.update_speaker_proj_id = None
         self.update_speaker_sel_id = None
         self.update_test_displays_id = None
+        self.update_console_displays_id = None
+
 
         self.current_stim_number = ''
         self.current_speaker_projecting_number = ''
         self.current_speaker_selected_number = ''
 
         self.playing_icon = PhotoImage(file=configuration.playing_icon_filepath)
+        self.playing_icon_s = PhotoImage(file=configuration.playing_icon_s_filepath)
         self.start_icon = PhotoImage(file=configuration.start_icon_filepath)
         self.stop_icon = PhotoImage(file=configuration.stop_icon_filepath)
         self.pause_icon = PhotoImage(file=configuration.pause_icon_filepath)
@@ -503,22 +510,71 @@ class Main_Frame(ctk.CTkFrame):
             self.update_speaker_sel_id = None
 
     # WARM UP TEST VIEWS ------------------------
+    def reset_warmup_tests(self):
+        self.warmup_test_1.configure(text='Test 1', bg_color=configuration.warmup_neutral_bg_color, image='')
+        self.warmup_test_2.configure(text='Test 2', bg_color=configuration.warmup_neutral_bg_color, image='')
+        self.warmup_test_3.configure(text='Test 3', bg_color=configuration.warmup_neutral_bg_color, image='')
+        self.warmup_test_4.configure(text='Test 4', bg_color=configuration.warmup_neutral_bg_color, image='')
+        self.warmup_test_5.configure(text='Test 5', bg_color=configuration.warmup_neutral_bg_color, image='')
 
     def update_warmup_test_displays(self):
         self.event_handler(Event.VR_INPUT)
         # selection = self.something
-        stim_num = self.current_stim_number
+        # if selection == self.speaker projecting
+            # change text color to match
 
-        self.warmup_test_1.configure(bg_color=configuration.settings_fg_color)
-        self.warmup_test_1.configure(bg_color=configuration.settings_fg_color)
+        if self.current_stim_number == '1':
+            self.warmup_test_1.configure(text='   Test 1',
+                                         bg_color=configuration.warmup_playing_bg_color, image=self.playing_icon, compound='left')
+        elif self.current_stim_number == '2':
+            self.warmup_test_1.configure(text='Test 1', image='')
+            self.warmup_test_2.configure(text='   Test 2',
+                                         bg_color=configuration.warmup_playing_bg_color, image=self.playing_icon, compound='left')
+        elif self.current_stim_number == '3':
+            # self.warmup_test_1.configure(text='Test 1', image='')
+            self.warmup_test_2.configure(text='Test 2', image='')
+            self.warmup_test_3.configure(text='   Test 3',
+                                         bg_color=configuration.warmup_playing_bg_color, image=self.playing_icon, compound='left')
+        elif self.current_stim_number == '4':
+            # self.warmup_test_1.configure(text='Test 1', image='')
+            # self.warmup_test_2.configure(text='Test 2', image='')
+            self.warmup_test_3.configure(text='Test 3', image='')
+            self.warmup_test_4.configure(text='   Test 4',
+                                         bg_color=configuration.warmup_playing_bg_color, image=self.playing_icon, compound='left')
+        elif self.current_stim_number == '5':
+            # self.warmup_test_1.configure(text='Test 1', image='')
+            # self.warmup_test_2.configure(text='Test 2', image='')
+            # self.warmup_test_3.configure(text='Test 3', image='')
+            self.warmup_test_4.configure(text='Test 4', image='')
+            self.warmup_test_5.configure(text='   Test 5',
+                                         bg_color=configuration.warmup_playing_bg_color, image=self.playing_icon, compound='left')
+        else:
+            self.warmup_test_1.configure(bg_color=configuration.warmup_neutral_bg_color, image='')
+            self.warmup_test_2.configure(bg_color=configuration.warmup_neutral_bg_color, image='')
+            self.warmup_test_3.configure(bg_color=configuration.warmup_neutral_bg_color, image='')
+            self.warmup_test_4.configure(bg_color=configuration.warmup_neutral_bg_color, image='')
+            self.warmup_test_5.configure(bg_color=configuration.warmup_neutral_bg_color, image='')
 
-        self.current_stimulus_display.configure(text=stim_num)
-        self.update_stim_num_id = self.after(100, self.update_stim_number)
+        self.update_test_displays_id = self.after(100, self.update_warmup_test_displays)
 
-def stop_update_warmup_test_displays(self):
+    def stop_update_warmup_test_displays(self):
+            if self.update_test_displays_id:
+                self.after_cancel(self.update_test_displays_id)
+                self.update_test_displays_id = None
 
-        pass
+    # EXPERIMENT VIEWS ------------------------
+    def update_console_display(self):
+        get_group_number = lambda index: (int(index)-1) // 5
+        self.console_frame.group_number = get_group_number(self.current_stim_number)
+        if self.console_frame.group_number != 21:
+            self.console_frame.stim_labels[self.previous_group_state].configure(image='')
+            self.console_frame.stim_labels[self.console_frame.group_number].configure(image=self.playing_icon_s, compound='right')
+
+        self.previous_group_state = self.console_frame.group_number
+        self.update_console_displays_id = self.after(100, self.update_console_display)
 
 
-
-
+    def stop_update_console_display(self):
+        if self.update_console_displays_id:
+            self.after_cancel(self.update_console_displays_id)
+            self.update_console_displays_id = None

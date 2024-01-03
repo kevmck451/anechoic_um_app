@@ -42,7 +42,7 @@ class Settings_Window(ctk.CTk):
     def on_close(self):
         # Perform any cleanup or process termination steps here
         # For example, safely terminate any running threads, save state, release resources, etc.
-        print("Performing cleanup before exiting...")  # Replace this with actual cleanup code
+        # print("Performing cleanup before exiting...")  # Replace this with actual cleanup code
 
         # End the application
         self.destroy()
