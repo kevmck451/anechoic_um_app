@@ -9,7 +9,7 @@ def base_path(relative_path):
 window_title = 'University of Memphis | Hearing Aid Research Laboratory | Sound Localization Experiment'
 
 window_width = 1300 # 1400
-window_height = 600  # 800
+window_height = 650  # 800
 min_window_width = 1000
 min_window_height = 600
 x_pad_main = 2
