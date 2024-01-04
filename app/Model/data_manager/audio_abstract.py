@@ -5,7 +5,7 @@ from pathlib import Path
 import soundfile as sf
 import numpy as np
 import librosa
-import wave
+
 
 
 class Audio_Abstract:
@@ -148,17 +148,3 @@ class Audio_Abstract:
 
 
 
-
-if __name__ == '__main__':
-
-    a = Audio_Abstract(stats=True)
-
-    print('-' * 50)
-
-    filepath = '/Users/KevMcK/Dropbox/2 Work/1 Optics Lab/1 Acoustic/Data/ML Model Data/Orlando/mission 5/Hex_FullFlight_5.wav'
-    b = Audio_Abstract(filepath=filepath, stats=True)
-
-    print('-'*50)
-
-    filepath = '/Users/KevMcK/Dropbox/2 Work/1 Optics Lab/1 Acoustic/Data/ML Model Data/Orlando/dataset 5/1/5_target_1_a.wav'
-    c = Audio_Abstract(filepath=filepath, stats=True)

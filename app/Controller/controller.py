@@ -4,15 +4,15 @@ from threading import Thread
 import time
 import threading
 
-from TDT_manager import TDT_Circuit
-from VR_manager import VR_Headset_Hardware
-from data_manager import circuit_data
-from experiment_state import Experiment
-from settings import Settings_Window
-from utilities import CSVFile_Experiment
-from utilities import CSVFile_Settings
-from events import Event
-from utilities import time_class
+from app.Model.tdt_hardware.TDT_manager import TDT_Circuit
+from app.Model.vr_hardware.VR_manager import VR_Headset_Hardware
+from app.Model.data_manager import circuit_data
+from app.Controller.experiment_state import Experiment
+from app.View.settings import Settings_Window
+from app.Controller.utilities import CSVFile_Experiment
+from app.Controller.utilities import CSVFile_Settings
+from app.Controller.events import Event
+from app.Controller.utilities import time_class
 
 class Controller:
     def __init__(self):

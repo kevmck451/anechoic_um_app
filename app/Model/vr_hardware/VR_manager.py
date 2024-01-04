@@ -1,11 +1,6 @@
-
-import socket
 from threading import Thread
+import socket
 import time
-
-from utilities import time_class
-
-
 
 
 class VR_Headset_Hardware:

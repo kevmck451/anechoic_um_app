@@ -5,9 +5,9 @@ import tkinter as tk
 import warnings
 from tkinter import ttk
 
-import configuration
-from controller import Event
-from utilities import time_class
+import app.View.configuration as configuration
+from app.Controller.events import Event
+from app.Controller.utilities import time_class
 
 
 

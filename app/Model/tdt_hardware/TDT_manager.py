@@ -1,5 +1,4 @@
-# from tdt import DSPProject
-import numpy as np
+
 import sounddevice as sd
 import time
 
@@ -18,6 +17,7 @@ class TDT_Circuit:
     def connect_hardware(self):
         print('Initializing TDT Hardware')
         try:
+            from tdt import DSPProject
             project = DSPProject()
             self.circuit = project.load_circuit(
                 circuit_name = RPvds_circuit_filepath,

@@ -4,8 +4,8 @@ import tkinter as tk
 import numpy as np
 import warnings
 
-import configuration
-from events import Event
+import app.View.configuration as configuration
+from app.Controller.events import Event
 
 
 

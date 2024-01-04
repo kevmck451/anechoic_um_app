@@ -1,10 +1,11 @@
-from data_manager.audio_abstract import Audio_Abstract
+
 from csv_class import CSVFile
 import numpy as np
 import random
 
-project_base_path = '..'
+from app.Model.data_manager.audio_abstract import Audio_Abstract
 
+project_base_path = '..'
 
 # -------------------------------------------------
 # LOADING DATA   ----------------------------------
