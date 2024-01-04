@@ -19,7 +19,7 @@ y_pad_1 = 10
 x_pad_2 = 10
 y_pad_2 = 10
 main_font_style = "default_font"
-main_font_size = 22 #26
+main_font_size = 20 #26
 
 main_window_icon = base_path('docs/harl_logo.png')
 playing_icon_filepath = base_path('docs/playing icon s.png')
