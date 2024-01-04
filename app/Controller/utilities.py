@@ -1,6 +1,7 @@
 # Functions for utilities
 
 from datetime import datetime
+from pathlib import Path
 import time
 import csv
 import os
@@ -17,7 +18,9 @@ class CSVFile_Experiment:
 
         current_script_dir = os.path.dirname(os.path.abspath(__file__))
         base_dir = os.path.dirname(os.path.dirname(current_script_dir))
-        csv_file_path = os.path.join(base_dir, 'output', f'{file_name}_Ex{exp_num}.csv')
+        output_path = os.path.join(base_dir, 'output')
+        Path(output_path).mkdir(exist_ok=True)
+        csv_file_path = os.path.join(output_path, f'{file_name}_Ex{exp_num}.csv')
 
         # Headers for the CSV file
         headers = ["stimulus number", "sample played", "speaker projected", "speaker selected", "reaction time",
