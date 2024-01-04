@@ -1,5 +1,5 @@
 
-from csv_class import CSVFile
+from app.Model.data_manager.csv_class import CSVFile
 import numpy as np
 import random
 
