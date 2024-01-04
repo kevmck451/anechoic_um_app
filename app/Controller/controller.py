@@ -2,6 +2,7 @@
 from enum import Enum, auto
 from threading import Thread
 import time
+import threading
 
 from TDT_manager import TDT_Circuit
 from VR_manager import VR_Headset_Hardware
@@ -132,10 +133,7 @@ class Controller:
         # Get Current Channel Selected to Display
         elif event == Event.CHANNEL_SEL_NUMBER:
             # set gui variable from experiment variable
-            if self.app_state == State.WARMUP_RUNNING:
-                self.gui.Main_Frame.current_speaker_selected_number = self.warmup.current_speaker_selected
-            elif self.app_state == State.EXPERIMENT_RUNNING:
-                self.gui.Main_Frame.current_speaker_selected_number = self.experiment.current_speaker_selected
+            self.gui.Main_Frame.current_speaker_selected_number = self.vr_hardware.selected_speaker
 
         # Reset Experiment Conditions
         elif event == Event.RESET_EXPERIMENT:
@@ -156,11 +154,6 @@ class Controller:
             value = float(value.split(':')[1].strip().split(' ')[0])
             self.settings_file.set_default_setting('time bw samples', value)
 
-        # VR Input
-        elif event == Event.VR_INPUT:
-            # get whatever values when asked
-            input = self.vr_hardware.headset_state
-
         # Get Initial Time before Samples
         elif event == Event.GET_INITIAL_TBS:
             # get default values
@@ -173,11 +166,6 @@ class Controller:
                 self.start_vr_hardware()
                 self.app_state = State.IDLE
 
-        # Get headset status
-        elif event == Event.VR_CONNECTION:
-            self.gui.Main_Frame.vr_connection = self.vr_hardware.headset_state
-
-
         # Disconnect VR Hardware
         elif event == Event.VR_DISCONNECT:
             if self.app_state == State.IDLE:
@@ -185,6 +173,11 @@ class Controller:
                 self.vr_hardware.disconnect_hardware()
                 self.gui.Main_Frame.toggle_vr_button()
                 self.app_state = State.IDLE
+
+        # Get headset status
+        elif event == Event.VR_CONNECTION:
+            # event to update connection status
+            self.gui.Main_Frame.vr_connection = self.vr_hardware.headset_state
 
     def start_vr_hardware(self):
         self.gui.Main_Frame.manage_loading_audio_popup(text='Waiting for Connection...', show=True)
@@ -234,7 +227,10 @@ class Controller:
 
         self.warmup.current_index = 0
         self.warmup.max_index = 4
+        self.vr_hardware.selected_speaker = 0
+        self.vr_hardware.num_selections = 0
         self.warmup.update_current_stim_number(self.warmup.current_index)
+        # self.vr_hardware.get_vr_input()
         self.gui.Main_Frame.update_stim_number()
         self.gui.Main_Frame.update_speaker_projecting_number()
         self.gui.Main_Frame.update_speaker_selected_number()
@@ -252,12 +248,31 @@ class Controller:
                 channel_num = self.warmup.channel_list[self.warmup.current_index]
                 self.warmup.current_speaker_projecting = channel_num
 
+                stop_event = threading.Event()
+
                 if self.tdt_hardware.circuit_state == False:
-                    self.tdt_hardware.trigger_audio_sample_computer(audio_sample)
+                    audio_thread = Thread(target=self.tdt_hardware.trigger_audio_sample_computer,
+                                          args=(audio_sample, self.settings_file.get_setting('time bw samples')),
+                                          daemon=True)
 
                 else:
-                    # real TDT Hardware code here
-                    self.tdt_hardware.trigger_audio_sample(audio_sample, channel_num)
+                    audio_thread = Thread(target=self.tdt_hardware.trigger_audio_sample,
+                                          args=(audio_sample, channel_num, self.settings_file.get_setting('time bw samples')),
+                                          daemon=True)
+
+                if self.vr_hardware.headset_state:
+                    vr_thread = Thread(target=self.vr_hardware.update_vr_input_values, args=(stop_event,), daemon=True)
+                else:
+                    vr_thread = Thread(target=self.vr_hardware.update_vr_input_values_NC, args=(stop_event,), daemon=True)
+
+                audio_thread.start()
+                vr_thread.start()
+
+                audio_thread.join()
+                stop_event.set()
+                vr_thread.join()
+
+                self.vr_hardware.selected_speaker = 0
 
                 time.sleep(self.settings_file.get_setting('time bw samples'))
                 self.warmup.current_index += 1
@@ -291,6 +306,8 @@ class Controller:
         self.experiment.experiment_in_progress = False
         self.experiment.current_index = 0
         self.experiment.max_index = 99
+        self.vr_hardware.selected_speaker = 0
+        self.vr_hardware.num_selections = 0
         self.experiment.update_current_stim_number(self.experiment.current_index)
         self.gui.Main_Frame.start_experiment_timer()
         self.gui.Main_Frame.update_stim_number()
@@ -303,6 +320,7 @@ class Controller:
     def perform_experiment_rounds(self):
         while self.experiment.current_index <= self.experiment.max_index:
             if self.experiment.experiment_in_progress == False:
+                reaction_timer = time_class('reaction timer')
                 if self.experiment.current_index < 101:
                     self.experiment.update_current_stim_number(self.experiment.current_index)
                 self.experiment.experiment_in_progress = True
@@ -311,24 +329,44 @@ class Controller:
                 channel_num = self.experiment.channel_list[self.experiment.current_index]
                 self.experiment.current_speaker_projecting = channel_num
 
+                stop_event = threading.Event()
 
                 if self.tdt_hardware.circuit_state == False:
-                    self.tdt_hardware.trigger_audio_sample_computer(audio_sample)
+                    audio_thread = Thread(target=self.tdt_hardware.trigger_audio_sample_computer,
+                                          args=(audio_sample, self.settings_file.get_setting('time bw samples')),
+                                          daemon=True)
 
                 else:
-                    # real TDT Hardware code here
-                    self.tdt_hardware.trigger_audio_sample(audio_sample, channel_num)
+                    audio_thread = Thread(target=self.tdt_hardware.trigger_audio_sample,
+                                          args=(audio_sample, channel_num, self.settings_file.get_setting('time bw samples')),
+                                          daemon=True)
+
+                if self.vr_hardware.headset_state:
+                    vr_thread = Thread(target=self.vr_hardware.update_vr_input_values,
+                                       args=(stop_event, ), kwargs={'reaction_timer': reaction_timer},
+                                       daemon=True)
+                else:
+                    vr_thread = Thread(target=self.vr_hardware.update_vr_input_values_NC,
+                                       args=(stop_event, ), kwargs={'reaction_timer': reaction_timer},
+                                       daemon=True)
+
+                audio_thread.start()
+                vr_thread.start()
+                audio_thread.join()
+                stop_event.set()
+                vr_thread.join()
 
                 # Get VR Response
-                speaker_selected = 0
-                reaction_time = 0
-                num_selections = 0
-
+                speaker_selected = self.vr_hardware.selected_speaker
+                reaction_time = self.vr_hardware.time_selection_given
+                num_selections = self.vr_hardware.num_selections
                 self.output_file.write_row_at(int(self.experiment.current_index),
-                                              [self.experiment.current_stim_number, audio_sample.name, channel_num, speaker_selected,
+                                              [self.experiment.current_stim_number, audio_sample.name, channel_num,
+                                               speaker_selected,
                                                reaction_time, num_selections])
 
-                time.sleep(self.settings_file.get_setting('time bw samples'))
+                self.vr_hardware.selected_speaker = 0
+                self.vr_hardware.num_selections = 0
                 self.experiment.current_index += 1
                 self.experiment.experiment_in_progress = False
             if self.pause_flag_raised:
@@ -363,6 +401,9 @@ class Controller:
     def pause_experiment(self):
         while self.pause_flag_raised and self.app_state == State.EXPERIMENT_PAUSED:
             time.sleep(0.1)
+
+
+
 
 
 # Define the states using an enumeration

@@ -455,6 +455,22 @@ class Main_Frame(ctk.CTkFrame):
                                                command=lambda: self.event_handler(Event.PAUSE))
             self.pause_button_state = True
 
+    def toggle_vr_button(self):
+        if self.vr_button_state == 0:
+            self.vr_status.configure(text=configuration.connection_status_VR_C,
+                                     text_color=configuration.connected_color)
+            self.VR_button.configure(text='Disconnect',
+                                     fg_color=configuration.stop_fg_color, hover_color=configuration.stop_hover_color,
+                                     command=lambda: self.event_handler(Event.VR_DISCONNECT))
+            self.vr_button_state += 1
+        else:
+            self.vr_status.configure(text=configuration.connection_status_VR,
+                                     text_color=configuration.not_connected_color)
+            self.VR_button.configure(text='Connect',
+                                     fg_color=configuration.button_fg_color, hover_color=configuration.button_hover_color,
+                                     command=lambda: self.event_handler(Event.VR_CONNECT))
+            self.vr_button_state = 0
+
     # RESET DISPLAYS ------------------------
     def reset_metadata_displays(self):
         self.current_stimulus_display.configure(text='None')
@@ -504,9 +520,10 @@ class Main_Frame(ctk.CTkFrame):
 
     def update_speaker_selected_number(self):
         self.event_handler(Event.CHANNEL_SEL_NUMBER)
-        text = self.current_speaker_selected_number
+        if self.current_speaker_selected_number == 0: text = ''
+        else: text = self.current_speaker_selected_number
         self.selection_made_display.configure(text=text)
-        self.update_speaker_sel_id = self.after(100, self.update_speaker_selected_number)
+        self.update_speaker_sel_id = self.after(10, self.update_speaker_selected_number)
 
     def stop_update_speaker_selected_number(self):
         if self.update_speaker_sel_id:
@@ -595,28 +612,4 @@ class Main_Frame(ctk.CTkFrame):
         if self.vr_hardware_id:
             self.after_cancel(self.vr_hardware_id)
             self.vr_hardware_id = None
-
-    def toggle_vr_button(self):
-        if self.vr_button_state == 0:
-            self.vr_status.configure(text=configuration.connection_status_VR_C,
-                                     text_color=configuration.connected_color)
-            self.VR_button.configure(text='Disconnect',
-                                     fg_color=configuration.stop_fg_color, hover_color=configuration.stop_hover_color,
-                                     command=lambda: self.event_handler(Event.VR_DISCONNECT))
-            self.vr_button_state += 1
-        # elif self.vr_button_state == 1:
-        #     self.vr_status.configure(text=configuration.connection_status_VR,
-        #                                  text_color=configuration.not_connected_color)
-        #     self.VR_button.configure(text='Connect',
-        #                              fg_color=configuration.start_fg_color, hover_color=configuration.start_hover_color,
-        #                              command=lambda: self.event_handler(Event.VR_CONNECT))
-        #     self.vr_button_state += 1
-
-        else:
-            self.vr_status.configure(text=configuration.connection_status_VR,
-                                     text_color=configuration.not_connected_color)
-            self.VR_button.configure(text='Connect',
-                                     fg_color=configuration.button_fg_color, hover_color=configuration.button_hover_color,
-                                     command=lambda: self.event_handler(Event.VR_CONNECT))
-            self.vr_button_state = 0
 
