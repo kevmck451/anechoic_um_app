@@ -5,7 +5,7 @@ from enum import Enum, auto
 # Define the events
 class Event(Enum):
     TDT_CONNECT = auto()
-
+    TDT_DISCONNECT = auto()
     LOAD_EXPERIMENT = auto()
     START_WARMUP = auto()
     END_WARMUP = auto()

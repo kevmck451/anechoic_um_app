@@ -39,7 +39,14 @@ class Controller:
         if event == Event.TDT_CONNECT:
             if self.app_state == State.IDLE:
                 self.app_state = State.TDT_INITIALIZING
-                self.tdt_hardware.connect_hardware()
+                self.start_tdt_hardware()
+
+        elif event == Event.TDT_DISCONNECT:
+            if self.app_state == State.IDLE:
+                self.app_state = State.TDT_INITIALIZING
+                self.tdt_hardware.disconnect_hardware()
+                self.gui.Main_Frame.toggle_vr_button()
+                self.app_state = State.IDLE
 
         # Load Experiment: FINISHED
         elif event == Event.LOAD_EXPERIMENT:
@@ -163,7 +170,6 @@ class Controller:
             if self.app_state == State.IDLE:
                 self.app_state = State.VR_INITIALIZING
                 self.start_vr_hardware()
-                self.app_state = State.IDLE
 
         # Disconnect VR Hardware
         elif event == Event.VR_DISCONNECT:
@@ -196,6 +202,29 @@ class Controller:
         self.gui.Main_Frame.close_loading_popup()
         if self.vr_hardware.headset_state:
             self.gui.Main_Frame.toggle_vr_button()
+        else:
+            self.gui.Main_Frame.warning_popup_general(message='connection could not be made')
+
+        self.app_state = State.IDLE
+
+    def start_tdt_hardware(self):
+        self.gui.Main_Frame.manage_loading_audio_popup(text='Waiting for Connection...', show=True)
+        load_thread = Thread(target=self.wait_for_tdt_connection, daemon=True)
+        load_thread.start()
+
+    def wait_for_tdt_connection(self):
+        connection_time = time_class('connection_time')
+        load_thread = Thread(target=self.tdt_hardware.connect_hardware, daemon=True)
+        load_thread.start()
+        wait_time = 5
+        while self.tdt_hardware.circuit_state == False:
+            if connection_time.reaction_time() > wait_time:
+                print(f'connection timed out at {wait_time} secs')
+                break
+
+        self.gui.Main_Frame.close_loading_popup()
+        if self.tdt_hardware.circuit_state:
+            self.gui.Main_Frame.toggle_tdt_button()
         else:
             self.gui.Main_Frame.warning_popup_general(message='connection could not be made')
 
