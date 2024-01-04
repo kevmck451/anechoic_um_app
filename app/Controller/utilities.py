@@ -16,7 +16,9 @@ class CSVFile_Experiment:
         # Format the date and time in a file-friendly format (e.g., YYYYMMDD_HHMMSS)
         file_name = current_time.strftime("%Y-%m-%d_%I-%M-%S_%p")
 
-        csv_file_path = f'../output/{file_name}_Ex{exp_num}.csv'
+        current_script_dir = os.path.dirname(os.path.abspath(__file__))
+        base_dir = os.path.dirname(os.path.dirname(current_script_dir))
+        csv_file_path = os.path.join(base_dir, 'output', f'{file_name}_Ex{exp_num}.csv')
 
         # Headers for the CSV file
         headers = ["stimulus number", "sample played", "speaker projected", "speaker selected", "reaction time",
