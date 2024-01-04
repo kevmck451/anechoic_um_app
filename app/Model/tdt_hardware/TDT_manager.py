@@ -1,6 +1,7 @@
 
 import sounddevice as sd
 import time
+import os
 
 
 class TDT_Circuit:
@@ -10,8 +11,9 @@ class TDT_Circuit:
         # if random: self.circuit_state = True
         # else: self.circuit_state = False
         self.circuit_state = False
-
-        RPvds_circuit_filepath = 'tdt_circuit.rcx'
+        current_script_dir = os.path.dirname(os.path.abspath(__file__))
+        new_path = os.path.join(current_script_dir, 'tdt_circuit.rcx')
+        self.RPvds_circuit_filepath = new_path
 
 
     def connect_hardware(self):
@@ -19,22 +21,27 @@ class TDT_Circuit:
         while i < 5 or self.circuit_state == False:
             try:
                 from tdt import DSPProject
+                print('import successful')
                 project = DSPProject()
                 self.circuit = project.load_circuit(
-                    circuit_name = RPvds_circuit_filepath,
+                    circuit_name = self.RPvds_circuit_filepath,
                     device_name = 'RX8')
+                print('circuit loaded')
                 self.circuit.start()
+                print('circuit started')
 
                 if self.circuit.is_connected:
                     print('Hardware is Connected')
                     self.circuit_state = True
                 else: self.circuit_state = False
+                print('not connected')
 
             # except DSPError as e:
             #     self.circuit_state = False
             #     pass
 
             except Exception as e:
+                print('exception')
                 self.circuit_state = False
                 i += 1
                 time.sleep(0.7)
