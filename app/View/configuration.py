@@ -1,7 +1,5 @@
 import os
 
-
-
 def base_path(relative_path):
     current_script_dir = os.path.dirname(os.path.abspath(__file__))
     base_dir = os.path.dirname(os.path.dirname(current_script_dir))

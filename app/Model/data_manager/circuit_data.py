@@ -2,10 +2,16 @@
 from app.Model.data_manager.csv_class import CSVFile
 import numpy as np
 import random
+import os
 
 from app.Model.data_manager.audio_abstract import Audio_Abstract
 
-project_base_path = '..'
+def base_path(relative_path):
+    current_script_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(current_script_dir)))
+    new_path = os.path.join(base_dir, relative_path)
+    return new_path
+
 
 # -------------------------------------------------
 # LOADING DATA   ----------------------------------
@@ -13,7 +19,7 @@ project_base_path = '..'
 # Build list of exp names
 def load_audio_names(experiment_number):
 
-    audio_csv_filepath = f'{project_base_path}/experiment files/samples.csv'
+    audio_csv_filepath = base_path('experiment files/samples.csv')
     audio_csv = CSVFile(file_path=audio_csv_filepath)
     sample_numbers = audio_csv.get_column(column_name=f'ex{experiment_number}')
 
@@ -48,7 +54,7 @@ def load_audio_names(experiment_number):
 # Build list of audio objects in correct order from file
 def load_audio_samples(experiment_number):
 
-    audio_csv_filepath = f'{project_base_path}/experiment files/samples.csv'
+    audio_csv_filepath = base_path('experiment files/samples.csv')
     audio_csv = CSVFile(file_path=audio_csv_filepath)
     sample_numbers = audio_csv.get_column(column_name=f'ex{experiment_number}')
 
@@ -81,7 +87,8 @@ def load_audio_samples(experiment_number):
         for i in range(1, 6):
             audio_name = f'{sample_name}_{i}.wav'
             # print(audio_name)
-            audio = Audio_Abstract(filepath=f'{project_base_path}/experiment files/audio/{audio_name}')
+            filepath = base_path('experiment files/audio')
+            audio = Audio_Abstract(filepath=f'{filepath}/{audio_name}')
             # print(audio.num_channels)
             audio_sample_buffer.append(audio)
 
@@ -90,7 +97,7 @@ def load_audio_samples(experiment_number):
 # Build list of channels to play samples from
 def load_channel_numbers(experiment_number):
 
-    channel_csv_filepath = f'{project_base_path}/experiment files/channels.csv'
+    channel_csv_filepath = base_path('experiment files/channels.csv')
     channel_csv = CSVFile(file_path=channel_csv_filepath)
     channel_numbers = channel_csv.get_column(column_name=f'ex{experiment_number}')
 
@@ -104,7 +111,9 @@ def load_warmup_data():
     for i in range(1, 6):
         audio_name = f'{sample_name}_{i}.wav'
         # print(audio_name)
-        audio = Audio_Abstract(filepath=f'{project_base_path}/experiment files/audio/{audio_name}')
+
+        filepath = base_path('experiment files/audio')
+        audio = Audio_Abstract(filepath=f'{filepath}/{audio_name}')
         # print(audio.num_channels)
         audio_sample_buffer.append(audio)
 
