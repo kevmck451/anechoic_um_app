@@ -1,7 +1,6 @@
 # Functions for utilities
 
 from datetime import datetime
-from pathlib import Path
 import time
 import csv
 import os
