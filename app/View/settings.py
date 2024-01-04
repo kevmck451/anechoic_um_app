@@ -13,7 +13,7 @@ from app.Controller.events import Event
 class Settings_Window(ctk.CTk):
     def __init__(self, event_handler, initial_values):
         super().__init__()
-
+        ctk.set_appearance_mode("light")
         # Computer Icon
 
         # Main Setup ------------------------------------------------------------

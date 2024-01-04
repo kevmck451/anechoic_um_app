@@ -14,6 +14,7 @@ from app.Controller.utilities import time_class
 class Main_Window(ctk.CTk):
     def __init__(self, event_handler):
         super().__init__()
+        ctk.set_appearance_mode("light")
         self.event_handler = event_handler
 
         # Computer Icon
