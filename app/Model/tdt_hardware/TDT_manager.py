@@ -16,28 +16,26 @@ class TDT_Circuit:
 
     def connect_hardware(self):
 
-        for i in range(5):
+        try:
+            from tdt import DSPProject
+            project = DSPProject()
+            self.circuit = project.load_circuit(
+                circuit_name = RPvds_circuit_filepath,
+                device_name = 'RX8')
+            self.circuit.start()
 
-            try:
-                from tdt import DSPProject
-                project = DSPProject()
-                self.circuit = project.load_circuit(
-                    circuit_name = RPvds_circuit_filepath,
-                    device_name = 'RX8')
-                self.circuit.start()
+            if self.circuit.is_connected:
+                # print('Hardware is Connected')
+                self.circuit_state = True
+            else: self.circuit_state = False
 
-                if self.circuit.is_connected:
-                    # print('Hardware is Connected')
-                    self.circuit_state = True
-                else: self.circuit_state = False
+        # except DSPError as e:
+        #     self.circuit_state = False
+        #     pass
 
-            # except DSPError as e:
-            #     self.circuit_state = False
-            #     pass
-
-            except Exception as e:
-                self.circuit_state = False
-                time.sleep(0.7)
+        except Exception as e:
+            self.circuit_state = False
+            time.sleep(0.7)
 
 
     def disconnect_hardware(self):
