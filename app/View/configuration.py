@@ -8,10 +8,10 @@ def base_path(relative_path):
 # Main App Settings
 window_title = 'University of Memphis | Hearing Aid Research Laboratory | Sound Localization Experiment'
 
-window_width = 1200 # 1400
-window_height = 400  # 800
+window_width = 1400 # 1400
+window_height = 600  # 800
 min_window_width = 1000
-min_window_height = 400
+min_window_height = 600
 x_pad_main = 2
 y_pad_main = 2
 x_pad_1 = 10
