@@ -38,7 +38,7 @@ dropdown_fg_color = '#0952AA'
 
 # Console Settings
 console_x_pad = 5
-console_y_pad = 0
+console_y_pad = 1
 console_font_style = ("default_font", 12)
 
 # Main Frame Settings
