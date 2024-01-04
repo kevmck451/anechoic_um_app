@@ -17,7 +17,7 @@ class Main_Window(ctk.CTk):
         self.event_handler = event_handler
 
         # Computer Icon
-        img = Image.open('../docs/harl_logo.png')
+        img = Image.open(configuration.main_window_icon)
         icon = ImageTk.PhotoImage(img)
         self.tk.call('wm', 'iconphoto', self._w, icon)
 
