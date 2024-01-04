@@ -89,7 +89,6 @@ class Controller:
                     self.gui.Main_Frame.toggle_pause_button()
                 self.app_state = State.EXPERIMENT_ENDED
                 self.stop_flag_raised = True
-                # self.end_experiment()
 
         # Pause Experiment:
         elif event == Event.PAUSE:

@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 import time
 import csv
+import os
 
 
 class CSVFile_Experiment:
@@ -65,8 +66,9 @@ class CSVFile_Experiment:
 
 class CSVFile_Settings:
     def __init__(self):
-        path = Path().absolute()
-        self.csv_file_path = f'{path}/Controller/settings.csv'
+        current_script_dir = os.path.dirname(os.path.abspath(__file__))
+        new_path = os.path.join(current_script_dir, 'settings.csv')
+        self.csv_file_path = new_path
 
     def _read_csv_file(self):
         with open(self.csv_file_path, 'r', encoding='utf-8-sig') as csvfile:
