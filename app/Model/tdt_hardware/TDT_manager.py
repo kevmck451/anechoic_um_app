@@ -21,36 +21,31 @@ class TDT_Circuit:
         while i < 5:
             try:
                 from tdt import DSPProject
-                print('import successful')
                 project = DSPProject()
                 self.circuit = project.load_circuit(
                     circuit_name = self.RPvds_circuit_filepath,
                     device_name = 'RX8')
-                print('circuit loaded')
                 self.circuit.start()
-                print('circuit started')
 
                 if self.circuit.is_connected:
-                    print('Hardware is Connected')
                     self.circuit_state = True
                     break
                 else:
                     self.circuit_state = False
-                    print('not connected')
 
             # except DSPError as e:
             #     self.circuit_state = False
             #     pass
 
             except Exception as e:
-                print('exception')
                 self.circuit_state = False
                 i += 1
                 time.sleep(0.7)
 
 
     def disconnect_hardware(self):
-        pass
+        self.circuit.stop()
+        self.circuit_state = False
 
     def trigger_audio_sample_computer(self, audio_sample, time_bw_samples):
         sd.play(audio_sample.data, audio_sample.sample_rate)

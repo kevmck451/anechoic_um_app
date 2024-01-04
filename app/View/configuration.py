@@ -9,9 +9,9 @@ def base_path(relative_path):
 window_title = 'University of Memphis | Hearing Aid Research Laboratory | Sound Localization Experiment'
 
 window_width = 1300 # 1400
-window_height = 600  # 800
+window_height = 700  # 800
 min_window_width = 1000
-min_window_height = 600
+min_window_height = 700
 x_pad_main = 2
 y_pad_main = 2
 x_pad_1 = 10
@@ -19,7 +19,7 @@ y_pad_1 = 10
 x_pad_2 = 10
 y_pad_2 = 10
 main_font_style = "default_font"
-main_font_size = 20 #26
+main_font_size = 22 #26
 
 main_window_icon = base_path('docs/harl_logo.png')
 playing_icon_filepath = base_path('docs/playing icon s.png')
@@ -39,7 +39,7 @@ dropdown_fg_color = '#0952AA'
 # Console Settings
 console_x_pad = 5
 console_y_pad = 0
-console_font_style = ("default_font", 10)
+console_font_style = ("default_font", 11)
 
 # Main Frame Settings
 

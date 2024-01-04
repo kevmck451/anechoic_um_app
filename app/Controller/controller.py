@@ -45,7 +45,7 @@ class Controller:
             if self.app_state == State.IDLE:
                 self.app_state = State.TDT_INITIALIZING
                 self.tdt_hardware.disconnect_hardware()
-                self.gui.Main_Frame.toggle_vr_button()
+                self.gui.Main_Frame.toggle_tdt_button()
                 self.app_state = State.IDLE
 
         # Load Experiment: FINISHED
