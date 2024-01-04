@@ -356,7 +356,7 @@ class Main_Frame(ctk.CTkFrame):
             center_x = int((screen_width / 2) - (window_width / 2))
             center_y = int((screen_height / 2) - (window_height / 2))
             self.loading_popup.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
-            tk.Label(self.loading_popup, text=text, font=("default_font", 20)).pack(
+            tk.Label(self.loading_popup, text=text, font=("default_font", 16)).pack(
                 pady=10)
             # Configure style for a larger progress bar
             style = ttk.Style(self.loading_popup)
@@ -393,7 +393,7 @@ class Main_Frame(ctk.CTkFrame):
         message_popup.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
 
         # Display the message
-        tk.Label(message_popup, text=message, font=("default_font", 20)).pack(pady=20)
+        tk.Label(message_popup, text=message, font=("default_font", 16)).pack(pady=20)
 
         # OK button to close the pop-up
         ok_button = tk.Button(message_popup, text="OK", background="#D3D3D3", padx=10, pady=10,
