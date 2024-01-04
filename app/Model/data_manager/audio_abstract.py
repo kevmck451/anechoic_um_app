@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 import soundfile as sf
 import numpy as np
-import librosa
+# import librosa
 
 
 
@@ -75,8 +75,8 @@ class Audio_Abstract:
 
         else:
             self.data, samplerate = sf.read(str(filepath), dtype='float32')
-            if samplerate != self.sample_rate:
-                self.data = librosa.resample(y=self.data, orig_sr=samplerate, target_sr=self.sample_rate)
+            # if samplerate != self.sample_rate:
+            #     self.data = librosa.resample(y=self.data, orig_sr=samplerate, target_sr=self.sample_rate)
             self.sample_length = round((len(self.data) / self.sample_rate), 2)
             self.num_samples = len(self.data)
 
