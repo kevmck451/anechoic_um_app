@@ -18,7 +18,7 @@ class TDT_Circuit:
 
     def connect_hardware(self):
         i = 0
-        while i < 5 or self.circuit_state == False:
+        while i < 5:
             try:
                 from tdt import DSPProject
                 print('import successful')
@@ -33,8 +33,10 @@ class TDT_Circuit:
                 if self.circuit.is_connected:
                     print('Hardware is Connected')
                     self.circuit_state = True
-                else: self.circuit_state = False
-                print('not connected')
+                    break
+                else:
+                    self.circuit_state = False
+                    print('not connected')
 
             # except DSPError as e:
             #     self.circuit_state = False

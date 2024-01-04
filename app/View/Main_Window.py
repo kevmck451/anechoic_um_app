@@ -475,14 +475,14 @@ class Main_Frame(ctk.CTkFrame):
 
     def toggle_tdt_button(self):
         if self.tdt_button_state == 0:
-            self.tdt_status.configure(text=configuration.connection_status_VR_C,
+            self.tdt_status.configure(text=configuration.connection_status_TDT_C,
                                      text_color=configuration.connected_color)
             self.TDT_button.configure(text='Disconnect',
                                      fg_color=configuration.stop_fg_color, hover_color=configuration.stop_hover_color,
                                      command=lambda: self.event_handler(Event.TDT_DISCONNECT))
             self.tdt_button_state += 1
         else:
-            self.tdt_status.configure(text=configuration.connection_status_VR,
+            self.tdt_status.configure(text=configuration.connection_status_TDT,
                                      text_color=configuration.not_connected_color)
             self.TDT_button.configure(text='Connect',
                                      fg_color=configuration.button_fg_color, hover_color=configuration.button_hover_color,
