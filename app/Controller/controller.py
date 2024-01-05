@@ -184,6 +184,12 @@ class Controller:
             # event to update connection status
             self.gui.Main_Frame.vr_connection = self.vr_hardware.headset_state
 
+        elif event == Event.ON_CLOSE:
+            if self.vr_hardware.headset_state:
+                self.vr_hardware.disconnect_hardware()
+            if self.tdt_hardware.circuit_state:
+                self.tdt_hardware.disconnect_hardware()
+
     def start_vr_hardware(self):
         self.gui.Main_Frame.manage_loading_audio_popup(text='Waiting for Connection...', show=True)
         load_thread = Thread(target=self.wait_for_vr_connection, daemon=True)

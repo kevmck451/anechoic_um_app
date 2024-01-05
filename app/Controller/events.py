@@ -26,3 +26,4 @@ class Event(Enum):
     VR_CONNECTION = auto()
     VR_CONNECT = auto()
     VR_DISCONNECT = auto()
+    ON_CLOSE = auto()

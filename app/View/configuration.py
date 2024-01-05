@@ -10,8 +10,8 @@ window_title = 'University of Memphis | Hearing Aid Research Laboratory | Sound 
 
 window_width = 1300 # 1400
 window_height = 640  # 800
-min_window_width = 1000
-min_window_height = 600
+min_window_width = 1300
+min_window_height = 640
 x_pad_main = 2
 y_pad_main = 2
 x_pad_1 = 10

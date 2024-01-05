@@ -53,6 +53,8 @@ class Main_Window(ctk.CTk):
 
         print("Performing cleanup before exiting...")  # Replace this with actual cleanup code
 
+        # todo if status == True on things, disconnect them
+
         # End the application
         self.destroy()
 
