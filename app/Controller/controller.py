@@ -41,6 +41,7 @@ class Controller:
                 self.app_state = State.TDT_INITIALIZING
                 self.start_tdt_hardware()
 
+        # Disconnect from TDT Hardware
         elif event == Event.TDT_DISCONNECT:
             if self.app_state == State.IDLE:
                 self.app_state = State.TDT_INITIALIZING
