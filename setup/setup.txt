@@ -50,6 +50,7 @@ python .\app\app_main.py
 
 
 # how to run it on anechoic chamber comp
+# cd into anechoic_um_app directory
 python -m app.app_main
 
 
