@@ -79,11 +79,13 @@ reset_hover_color = '#8F7FE9'
 
 # Settings Window
 settings_window_title = 'Experiment Settings'
-settings_window_width = 600
-settings_window_height = 400
+settings_window_width = 400
+settings_window_height = 200
 settings_min_window_width = 400
 settings_min_window_height = 200
 settings_window_icon_filepath = 'docs/settings window icon.png'
+x_pad_setting = 5
+y_pad_setting = 5
 
 
 

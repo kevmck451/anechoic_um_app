@@ -91,7 +91,7 @@ class Settings_Frame(ctk.CTkFrame):
                                                        font=(configuration.main_font_style, configuration.main_font_size),
                                                        fg_color=configuration.dropdown_fg_color,
                                                        dropdown_hover_color=configuration.dropdown_hover_color)
-        self.dropdown_time_bw_samp.grid(row=0, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2,
+        self.dropdown_time_bw_samp.grid(row=0, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
                                         sticky='nsew')
 
         # Load Stim Button
@@ -100,7 +100,7 @@ class Settings_Frame(ctk.CTkFrame):
                                               fg_color=configuration.button_fg_color,
                                               hover_color=configuration.button_hover_color,
                                               command=lambda: self.event_handler(Event.SET_DEFAULT_BW_TIME))
-        self.save_default_bw_time.grid(row=1, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2,
+        self.save_default_bw_time.grid(row=1, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
                                    sticky='nsew')
 
         # Stimulus Dropdown Box
@@ -109,13 +109,13 @@ class Settings_Frame(ctk.CTkFrame):
         self.dropdown_stim = ctk.CTkOptionMenu(frame, variable=self.option_var_stim, values=dropdown_values_stim,
                                                font=(configuration.main_font_style, configuration.main_font_size),
                                                fg_color=configuration.dropdown_fg_color, dropdown_hover_color=configuration.button_hover_color)
-        self.dropdown_stim.grid(row=2, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
+        self.dropdown_stim.grid(row=2, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting, sticky='nsew')
 
         # Load Stim Button
         self.load_stim_button = ctk.CTkButton(frame, text='Load', font=(configuration.main_font_style, configuration.main_font_size),
                                               fg_color=configuration.button_fg_color, hover_color=configuration.button_hover_color,
                                               command=lambda: self.event_handler(Event.SET_STIM_NUMBER))
-        self.load_stim_button.grid(row=3, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
+        self.load_stim_button.grid(row=3, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting, sticky='nsew')
 
 
 

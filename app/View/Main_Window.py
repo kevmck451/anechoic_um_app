@@ -630,12 +630,16 @@ class Main_Frame(ctk.CTkFrame):
 
     # VR HARDWARE VIEWS
     def vr_hardware_connection_status(self):
-        # self.event_handler(Event.VR_CONNECTION)
-        #
-        # if self.vr_button_state
-        #
-        # self.vr_hardware_id = self.after(1000, self.vr_hardware_connection_status)
-        pass
+        self.event_handler(Event.VR_CONNECTION)
+
+        if self.vr_connection:
+            self.vr_button_state = 1
+            self.toggle_vr_button()
+        else:
+            self.vr_button_state = 0
+            self.toggle_vr_button()
+
+        self.vr_hardware_id = self.after(1000, self.vr_hardware_connection_status)
 
     def stop_vr_hardware_connection_status(self):
         if self.vr_hardware_id:

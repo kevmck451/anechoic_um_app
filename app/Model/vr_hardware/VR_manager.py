@@ -23,7 +23,7 @@ class VR_Headset_Hardware:
 
         self.server_socket.listen()
         print('Waiting for Connection...')
-        self.server_socket.settimeout(10)  # 10 seconds timeout
+        self.server_socket.settimeout(40)  # 10 seconds timeout
 
         try:
             self.client_socket, addr = self.server_socket.accept()

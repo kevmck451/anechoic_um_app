@@ -178,6 +178,7 @@ class Controller:
             if self.app_state == State.IDLE:
                 self.app_state = State.VR_INITIALIZING
                 self.vr_hardware.disconnect_hardware()
+                # self.gui.Main_Frame.stop_vr_hardware_connection_status()
                 self.gui.Main_Frame.toggle_vr_button()
                 self.app_state = State.IDLE
 
@@ -193,13 +194,15 @@ class Controller:
             if self.tdt_hardware.circuit_state:
                 self.tdt_hardware.disconnect_hardware()
 
+
         # Loading Box was Closed
         elif event == Event.STOP_LOADING:
-
             if self.app_state == State.TDT_INITIALIZING:
                 self.tdt_hardware.initialize = False
+                self.gui.Main_Frame.toggle_tdt_button()
             if self.app_state == State.VR_INITIALIZING:
                 self.vr_hardware.initialize = False
+                self.gui.Main_Frame.toggle_vr_button()
             if self.app_state == State.LOADING_EXPERIMENT:
                 self.audio_loading = False
 
@@ -224,6 +227,7 @@ class Controller:
 
         self.gui.Main_Frame.close_loading_popup()
         if self.vr_hardware.headset_state:
+            # self.gui.Main_Frame.vr_hardware_connection_status()
             self.gui.Main_Frame.toggle_vr_button()
         else:
             if self.vr_hardware.initialize:
