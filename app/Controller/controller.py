@@ -194,15 +194,12 @@ class Controller:
             if self.tdt_hardware.circuit_state:
                 self.tdt_hardware.disconnect_hardware()
 
-
         # Loading Box was Closed
         elif event == Event.STOP_LOADING:
             if self.app_state == State.TDT_INITIALIZING:
                 self.tdt_hardware.initialize = False
-                self.gui.Main_Frame.toggle_tdt_button()
             if self.app_state == State.VR_INITIALIZING:
                 self.vr_hardware.initialize = False
-                self.gui.Main_Frame.toggle_vr_button()
             if self.app_state == State.LOADING_EXPERIMENT:
                 self.audio_loading = False
 
