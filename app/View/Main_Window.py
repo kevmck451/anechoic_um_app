@@ -51,11 +51,8 @@ class Main_Window(ctk.CTk):
         # Perform any cleanup or process termination steps here
         # For example, safely terminate any running threads, save state, release resources, etc.
 
-        print("Performing cleanup before exiting...")  # Replace this with actual cleanup code
+        self.event_handler(Event.ON_CLOSE)
 
-        # todo if status == True on things, disconnect them
-
-        # End the application
         self.destroy()
 
 

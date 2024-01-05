@@ -199,7 +199,7 @@ class Controller:
         connection_time = time_class('connection_time')
         load_thread = Thread(target=self.vr_hardware.connect_hardware, daemon=True)
         load_thread.start()
-        wait_time = 10
+        wait_time = 40
         while self.vr_hardware.headset_state == False:
             if connection_time.reaction_time() > wait_time:
                 print(f'connection timed out at {wait_time} secs')
