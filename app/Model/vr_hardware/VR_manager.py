@@ -12,6 +12,7 @@ class VR_Headset_Hardware:
         self.degree_error = ''
         self.time_selection_given = 0.0
         self.num_selections = 1
+        self.initialize = False
 
     def connect_hardware(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

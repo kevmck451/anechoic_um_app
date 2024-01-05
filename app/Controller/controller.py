@@ -29,6 +29,7 @@ class Controller:
         self.stop_flag_raised = False
         self.pause_flag_raised = False
         self.settings_file = CSVFile_Settings()
+        self.audio_loading = False
 
     def set_gui(self, gui):
         self.gui = gui
@@ -185,12 +186,24 @@ class Controller:
             # event to update connection status
             self.gui.Main_Frame.vr_connection = self.vr_hardware.headset_state
 
+        # Window Closing Actions
         elif event == Event.ON_CLOSE:
             if self.vr_hardware.headset_state:
                 self.vr_hardware.disconnect_hardware()
             if self.tdt_hardware.circuit_state:
                 self.tdt_hardware.disconnect_hardware()
 
+        # Loading Box was Closed
+        elif event == Event.STOP_LOADING:
+
+            if self.app_state == State.TDT_INITIALIZING:
+                self.tdt_hardware.initialize = False
+            if self.app_state == State.VR_INITIALIZING:
+                self.vr_hardware.initialize = False
+            if self.app_state == State.LOADING_EXPERIMENT:
+                self.audio_loading = False
+
+    # Action Functions ------------------------------
     def start_vr_hardware(self):
         self.gui.Main_Frame.manage_loading_audio_popup(text='Waiting for Connection...', show=True)
         load_thread = Thread(target=self.wait_for_vr_connection, daemon=True)
@@ -201,7 +214,10 @@ class Controller:
         load_thread = Thread(target=self.vr_hardware.connect_hardware, daemon=True)
         load_thread.start()
         wait_time = 40
+        self.vr_hardware.initialize = True
         while self.vr_hardware.headset_state == False:
+            if self.vr_hardware.initialize == False:
+                break
             if connection_time.reaction_time() > wait_time:
                 print(f'connection timed out at {wait_time} secs')
                 break
@@ -210,8 +226,10 @@ class Controller:
         if self.vr_hardware.headset_state:
             self.gui.Main_Frame.toggle_vr_button()
         else:
-            self.gui.Main_Frame.warning_popup_general(message='connection could not be made')
+            if self.vr_hardware.initialize:
+                self.gui.Main_Frame.warning_popup_general(message='connection could not be made')
 
+        self.vr_hardware.initialize = False
         self.app_state = State.IDLE
 
     def start_tdt_hardware(self):
@@ -224,7 +242,10 @@ class Controller:
         load_thread = Thread(target=self.tdt_hardware.connect_hardware, daemon=True)
         load_thread.start()
         wait_time = 40
+        self.tdt_hardware.initialize = True
         while self.tdt_hardware.circuit_state == False:
+            if self.tdt_hardware.initialize == False:
+                break
             if connection_time.reaction_time() > wait_time:
                 print(f'connection timed out at {wait_time} secs')
                 break
@@ -233,13 +254,16 @@ class Controller:
         if self.tdt_hardware.circuit_state:
             self.gui.Main_Frame.toggle_tdt_button()
         else:
-            self.gui.Main_Frame.warning_popup_general(message='connection could not be made')
+            if self.tdt_hardware.initialize:
+                self.gui.Main_Frame.warning_popup_general(message='connection could not be made')
 
+        self.tdt_hardware.initialize = False
         self.app_state = State.IDLE
 
     def load_experiment(self, selected_value):
         exp_num = selected_value.split(' ')[1]
         self.sample_names_list = circuit_data.load_audio_names(exp_num)
+        self.audio_loading = True
         self.gui.Main_Frame.manage_loading_audio_popup(text="Loading audio samples, please wait...", show=True)
         load_thread = Thread(target=self.load_audio_samples, args=(exp_num,), daemon=True)
         load_thread.start()
@@ -247,11 +271,14 @@ class Controller:
     def load_audio_samples(self, experiment_id):
         self.audio_samples_list = circuit_data.load_audio_samples(experiment_id)
         self.channel_list = circuit_data.load_channel_numbers(experiment_id)
-        self.experiment.set_audio_channel_list(self.audio_samples_list, self.channel_list)
-        self.experiment_loaded = True
-        self.gui.Console_Frame.update_console_box(self.sample_names_list, experiment=experiment_id)
-        self.gui.Main_Frame.close_loading_popup()
-        self.app_state = State.IDLE
+
+        if self.audio_loading:
+            self.experiment.set_audio_channel_list(self.audio_samples_list, self.channel_list)
+            self.experiment_loaded = True
+            self.gui.Console_Frame.update_console_box(self.sample_names_list, experiment=experiment_id)
+            self.gui.Main_Frame.close_loading_popup()
+            self.app_state = State.IDLE
+            self.audio_loading = False
 
     def start_warmup(self):
         self.app_state = State.WARMUP_RUNNING

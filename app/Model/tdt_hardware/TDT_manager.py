@@ -11,16 +11,19 @@ class TDT_Circuit:
         # if random: self.circuit_state = True
         # else: self.circuit_state = False
         self.circuit_state = False
+        self.initialize = False
         current_script_dir = os.path.dirname(os.path.abspath(__file__))
         new_path = os.path.join(current_script_dir, 'tdt_circuit.rcx')
         self.RPvds_circuit_filepath = new_path
 
 
     def connect_hardware(self):
-        i = 0
-        while i < 5:
+
+        while self.initialize:
             try:
+                print('connecting')
                 from tdt import DSPProject
+                print('imported')
                 project = DSPProject()
                 self.circuit = project.load_circuit(
                     circuit_name = self.RPvds_circuit_filepath,
@@ -29,6 +32,8 @@ class TDT_Circuit:
 
                 if self.circuit.is_connected:
                     self.circuit_state = True
+                    self.initialize = False
+                    print('connected')
                     break
                 else:
                     self.circuit_state = False
@@ -38,9 +43,9 @@ class TDT_Circuit:
             #     pass
 
             except Exception as e:
+                print('connection attempt failed')
                 self.circuit_state = False
-                i += 1
-                time.sleep(0.7)
+                time.sleep(1)
 
 
     def disconnect_hardware(self):

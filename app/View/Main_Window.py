@@ -372,13 +372,25 @@ class Main_Frame(ctk.CTkFrame):
                                             style="Larger.Horizontal.TProgressbar")
             self.progress.pack(pady=10)
             self.progress.start()
+
+            def on_close():
+                # Perform any necessary cleanup
+                self.event_handler(Event.STOP_LOADING)
+                self.progress.stop()
+                self.loading_popup.destroy()
+
+            self.loading_popup.protocol("WM_DELETE_WINDOW", on_close)
+
         else:
             if self.loading_popup:
                 self.progress.stop()
                 self.loading_popup.destroy()
 
     def close_loading_popup(self):
-        self.manage_loading_audio_popup(text='', show=False)
+        try:
+            self.manage_loading_audio_popup(text='', show=False)
+        except:
+            pass
 
     def warning_popup_general(self, message):
         message_popup = tk.Toplevel(self)
