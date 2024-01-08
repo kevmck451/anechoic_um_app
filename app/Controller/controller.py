@@ -211,10 +211,10 @@ class Controller:
 
     def wait_for_vr_connection(self):
         connection_time = time_class('connection_time')
+        self.vr_hardware.initialize = True
         load_thread = Thread(target=self.vr_hardware.connect_hardware, daemon=True)
         load_thread.start()
         wait_time = 40
-        self.vr_hardware.initialize = True
         while self.vr_hardware.headset_state == False:
             if self.vr_hardware.initialize == False:
                 break
@@ -241,10 +241,10 @@ class Controller:
     def wait_for_tdt_connection(self):
         connection_time = time_class('connection_time')
         print('connecting')
+        self.tdt_hardware.initialize = True
         load_thread = Thread(target=self.tdt_hardware.connect_hardware, daemon=True)
         load_thread.start()
         wait_time = 40
-        self.tdt_hardware.initialize = True
         while self.tdt_hardware.circuit_state == False:
             if self.tdt_hardware.initialize == False:
                 break

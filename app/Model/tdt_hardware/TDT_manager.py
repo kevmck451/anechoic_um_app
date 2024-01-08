@@ -18,7 +18,6 @@ class TDT_Circuit:
 
 
     def connect_hardware(self):
-
         while self.initialize:
             try:
                 print('connecting')
