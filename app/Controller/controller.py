@@ -240,7 +240,6 @@ class Controller:
 
     def wait_for_tdt_connection(self):
         connection_time = time_class('connection_time')
-        print('connecting')
         self.tdt_hardware.initialize = True
         load_thread = Thread(target=self.tdt_hardware.connect_hardware, daemon=True)
         load_thread.start()
