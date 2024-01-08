@@ -60,7 +60,9 @@ class Client_Class:
             # receive_thread.join()
 
 if __name__ == "__main__":
-    client = Client_Class('127.0.0.1', 12345)
+    # client = Client_Class('127.0.0.1', 12345)
+    client = Client_Class('192.168.1.253', 12345)
+
     client.start()
 
 
