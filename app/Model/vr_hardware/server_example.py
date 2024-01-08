@@ -5,7 +5,8 @@ import socket
 def server_example():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    host = '0.0.0.0'
+    # host = '0.0.0.0'
+    host = '192.168.1.253'
     port = 12345
     server_socket.bind((host, port))
 
