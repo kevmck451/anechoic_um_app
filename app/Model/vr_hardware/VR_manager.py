@@ -14,12 +14,16 @@ class VR_Headset_Hardware:
         self.num_selections = 1
         self.initialize = False
 
-    def connect_hardware(self):
+    def connect_hardware(self, ip_address, port_num):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # host = '0.0.0.0'
-        host = '192.168.1.253'
-        port = 12345
+        # host = '192.168.1.253'
+        # port = 12345
+        host = ip_address
+        port = int(port_num)
+
+
         self.server_socket.bind((host, port))
 
         self.server_socket.listen()

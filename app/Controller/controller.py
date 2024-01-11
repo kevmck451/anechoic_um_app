@@ -226,7 +226,10 @@ class Controller:
     def wait_for_vr_connection(self):
         connection_time = time_class('connection_time')
         self.vr_hardware.initialize = True
-        load_thread = Thread(target=self.vr_hardware.connect_hardware, daemon=True)
+        load_thread = Thread(target=self.vr_hardware.connect_hardware,
+                             args=(self.settings_file.get_setting('ip address'),
+                                   self.settings_file.get_setting('port')),
+                             daemon=True)
         load_thread.start()
         wait_time = 40
         while self.vr_hardware.headset_state == False:
@@ -329,12 +332,12 @@ class Controller:
 
                 if self.tdt_hardware.circuit_state == False:
                     audio_thread = Thread(target=self.tdt_hardware.trigger_audio_sample_computer,
-                                          args=(audio_sample, self.settings_file.get_setting('time bw samples')),
+                                          args=(audio_sample, float(self.settings_file.get_setting('time bw samples'))),
                                           daemon=True)
 
                 else:
                     audio_thread = Thread(target=self.tdt_hardware.trigger_audio_sample,
-                                          args=(audio_sample, channel_num, self.settings_file.get_setting('time bw samples')),
+                                          args=(audio_sample, channel_num, float(self.settings_file.get_setting('time bw samples'))),
                                           daemon=True)
 
                 if self.vr_hardware.headset_state:
@@ -351,7 +354,7 @@ class Controller:
 
                 self.vr_hardware.selected_speaker = 0
 
-                time.sleep(self.settings_file.get_setting('time bw samples'))
+                # time.sleep(self.settings_file.get_setting('time bw samples'))
                 self.warmup.current_index += 1
                 if self.warmup.current_index < 6:
                     self.warmup.update_current_stim_number(self.warmup.current_index)
@@ -410,12 +413,12 @@ class Controller:
 
                 if self.tdt_hardware.circuit_state == False:
                     audio_thread = Thread(target=self.tdt_hardware.trigger_audio_sample_computer,
-                                          args=(audio_sample, self.settings_file.get_setting('time bw samples')),
+                                          args=(audio_sample, float(self.settings_file.get_setting('time bw samples'))),
                                           daemon=True)
 
                 else:
                     audio_thread = Thread(target=self.tdt_hardware.trigger_audio_sample,
-                                          args=(audio_sample, channel_num, self.settings_file.get_setting('time bw samples')),
+                                          args=(audio_sample, channel_num, float(self.settings_file.get_setting('time bw samples'))),
                                           daemon=True)
 
                 if self.vr_hardware.headset_state:

@@ -85,8 +85,7 @@ class CSVFile_Settings:
         self.header, self.data = self._read_csv_file()
         column_index = self.header.index(setting)
         column_data = [row[column_index] for row in self.data]
-        value = float(column_data[0])
-        return value
+        return column_data[0]
 
     def set_default_setting(self, setting_name, setting_value):
         # Read the current data
