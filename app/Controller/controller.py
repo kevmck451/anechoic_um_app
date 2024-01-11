@@ -119,7 +119,9 @@ class Controller:
                     self.app_state == State.IDLE or \
                     self.app_state == State.EXPERIMENT_ENDED:
                 init_tbs = self.settings_file.get_setting('time bw samples')
-                self.settings_window = Settings_Window(self.handle_event, [init_tbs,])
+                init_ip = self.settings_file.get_setting('ip address')
+                init_port = self.settings_file.get_setting('port')
+                self.settings_window = Settings_Window(self.handle_event, [init_tbs, init_ip, init_port])
                 self.settings_window.mainloop()
 
         # Get Current Stim Number to Display

@@ -101,16 +101,16 @@ class Settings_Frame(ctk.CTkFrame):
 
 
 
-        # Stimulus Dropdown Box
+        # Time bw Samples Dropdown Box
         dropdown_values_time_bw_samp = [f'Time bw Samples: {x} sec' for x in np.arange(0, 4.5, 0.5)]
         value_list = [x for x in np.arange(0, 4.5, 0.5)]
-        init_index = 0
+        init_index_time = 0
         for i, value in enumerate(value_list):
             # print(str(self.initial_value[0]), str(value))
             if str(self.initial_value[0]) == str(value):
-                init_index = i
+                init_index_time = i
 
-        self.option_var_time_bw_samp = tk.StringVar(value=dropdown_values_time_bw_samp[init_index])  # Set initial value
+        self.option_var_time_bw_samp = tk.StringVar(value=dropdown_values_time_bw_samp[init_index_time])  # Set initial value
         self.dropdown_time_bw_samp = ctk.CTkOptionMenu(frame, variable=self.option_var_time_bw_samp,
                                                        values=dropdown_values_time_bw_samp,
                                                        font=(configuration.main_font_style, configuration.main_font_size),
@@ -132,7 +132,11 @@ class Settings_Frame(ctk.CTkFrame):
         # IP Settings
         ip_addresses = ['0.0.0.0', '192.168.1.253']
         dropdown_values_ip = [f'IP Address: {x}' for x in ip_addresses]
-        self.option_var_ip_address = tk.StringVar(value=dropdown_values_ip[0])  # Set initial value to the prompt text
+        init_index_ip = 0
+        for i, value in enumerate(ip_addresses):
+            if str(self.initial_value[1]) == str(value):
+                init_index_ip = i
+        self.option_var_ip_address = tk.StringVar(value=dropdown_values_ip[init_index_ip])  # Set initial value to the prompt text
         self.dropdown_ip_address = ctk.CTkOptionMenu(frame, variable=self.option_var_ip_address, values=dropdown_values_ip,
                                                font=(configuration.main_font_style, configuration.main_font_size),
                                                fg_color=configuration.dropdown_fg_color,
@@ -152,7 +156,11 @@ class Settings_Frame(ctk.CTkFrame):
         # Port Settings
         port_nums = ['12345', '99999', '86868']
         dropdown_values_port = [f'Port Number: {x}' for x in port_nums]
-        self.option_var_port = tk.StringVar(value=dropdown_values_port[0])  # Set initial value to the prompt text
+        init_index_port = 0
+        for i, value in enumerate(port_nums):
+            if str(self.initial_value[2]) == str(value):
+                init_index_port = i
+        self.option_var_port = tk.StringVar(value=dropdown_values_port[init_index_port])  # Set initial value to the prompt text
         self.dropdown_port = ctk.CTkOptionMenu(frame, variable=self.option_var_port, values=dropdown_values_port,
                                                font=(configuration.main_font_style, configuration.main_font_size),
                                                fg_color=configuration.dropdown_fg_color,
