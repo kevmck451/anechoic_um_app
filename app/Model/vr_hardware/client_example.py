@@ -60,7 +60,7 @@ class Client_Class:
             # receive_thread.join()
 
 if __name__ == "__main__":
-    print('IP Options: 127.0.0.1 or 192.168.1.253 or 141.255.179.76')
+    print('IP Options: 127.0.0.1 or 192.168.1.253 or 141.225.179.76')
     ip_input = input('IP Address: ')
 
     if ip_input == '1':
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     elif ip_input == '2':
         ip_address = '192.168.1.253'
     elif ip_input == '3':
-        ip_address = '141.255.179.76'
+        ip_address = '141.225.179.76'
     else: ip_address = ip_input
 
     # client = Client_Class('127.0.0.1', 12345)

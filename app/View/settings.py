@@ -130,7 +130,7 @@ class Settings_Frame(ctk.CTkFrame):
 
 
         # IP Settings
-        ip_addresses = ['0.0.0.0', '192.168.1.253', '141.255.179.76']
+        ip_addresses = ['0.0.0.0', '192.168.1.253', '141.225.179.76']
         dropdown_values_ip = [f'IP Address: {x}' for x in ip_addresses]
         init_index_ip = 0
         for i, value in enumerate(ip_addresses):
