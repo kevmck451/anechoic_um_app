@@ -21,6 +21,7 @@ class VR_Headset_Hardware:
         # host = '192.168.1.253'
         # port = 12345
         host = ip_address
+        print(host)
         port = int(port_num)
 
 
