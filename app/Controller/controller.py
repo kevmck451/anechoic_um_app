@@ -162,6 +162,20 @@ class Controller:
             value = float(value.split(':')[1].strip().split(' ')[0])
             self.settings_file.set_default_setting('time bw samples', value)
 
+        # Set default IP address
+        elif event == Event.SET_IP_ADDRESS:
+            # get value selected and set default
+            value = self.settings_window.Main_Frame.option_var_ip_address.get()
+            value = str(value.split(':')[1].strip())
+            self.settings_file.set_default_setting('ip address', value)
+
+        # Set default Port address
+        elif event == Event.SET_PORT_NUM:
+            # get value selected and set default
+            value = self.settings_window.Main_Frame.option_var_port.get()
+            value = str(value.split(':')[1].strip())
+            self.settings_file.set_default_setting('port', value)
+
         # Get Initial Time before Samples
         elif event == Event.GET_INITIAL_TBS:
             # get default values

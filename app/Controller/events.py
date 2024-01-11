@@ -28,3 +28,5 @@ class Event(Enum):
     VR_DISCONNECT = auto()
     ON_CLOSE = auto()
     STOP_LOADING = auto()
+    SET_IP_ADDRESS = auto()
+    SET_PORT_NUM = auto()

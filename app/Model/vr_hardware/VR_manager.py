@@ -17,7 +17,8 @@ class VR_Headset_Hardware:
     def connect_hardware(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        host = '0.0.0.0'
+        # host = '0.0.0.0'
+        host = '192.168.1.253'
         port = 12345
         self.server_socket.bind((host, port))
 

@@ -74,7 +74,32 @@ class Settings_Frame(ctk.CTkFrame):
         frame.grid_rowconfigure(1, weight=1)  # Row for the load button
         frame.grid_rowconfigure(2, weight=1)  # Row for the load button
         frame.grid_rowconfigure(3, weight=1)  # Row for the load button
+        frame.grid_rowconfigure(4, weight=1)  # Row for the load button
+        frame.grid_rowconfigure(5, weight=1)  # Row for the load button
+        frame.grid_rowconfigure(6, weight=1)  # Row for the load button
+        frame.grid_rowconfigure(7, weight=1)  # Row for the load button
         frame.grid_columnconfigure(0, weight=1)  # Single column
+
+        # Stimulus Dropdown Box
+        dropdown_values_stim = [f'Stimulus Start Number: {x}' for x in range(1, 101)]
+        self.option_var_stim = tk.StringVar(value=dropdown_values_stim[0])  # Set initial value to the prompt text
+        self.dropdown_stim = ctk.CTkOptionMenu(frame, variable=self.option_var_stim, values=dropdown_values_stim,
+                                               font=(configuration.main_font_style, configuration.main_font_size),
+                                               fg_color=configuration.dropdown_fg_color,
+                                               dropdown_hover_color=configuration.button_hover_color)
+        self.dropdown_stim.grid(row=0, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
+                                sticky='nsew')
+
+        # Load Stim Button
+        self.load_stim_button = ctk.CTkButton(frame, text='Load Stim',
+                                              font=(configuration.main_font_style, configuration.main_font_size),
+                                              fg_color=configuration.button_fg_color,
+                                              hover_color=configuration.button_hover_color,
+                                              command=lambda: self.event_handler(Event.SET_STIM_NUMBER))
+        self.load_stim_button.grid(row=1, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
+                                   sticky='nsew')
+
+
 
         # Stimulus Dropdown Box
         dropdown_values_time_bw_samp = [f'Time bw Samples: {x} sec' for x in np.arange(0, 4.5, 0.5)]
@@ -91,7 +116,7 @@ class Settings_Frame(ctk.CTkFrame):
                                                        font=(configuration.main_font_style, configuration.main_font_size),
                                                        fg_color=configuration.dropdown_fg_color,
                                                        dropdown_hover_color=configuration.dropdown_hover_color)
-        self.dropdown_time_bw_samp.grid(row=0, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
+        self.dropdown_time_bw_samp.grid(row=2, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
                                         sticky='nsew')
 
         # Load Stim Button
@@ -100,23 +125,47 @@ class Settings_Frame(ctk.CTkFrame):
                                               fg_color=configuration.button_fg_color,
                                               hover_color=configuration.button_hover_color,
                                               command=lambda: self.event_handler(Event.SET_DEFAULT_BW_TIME))
-        self.save_default_bw_time.grid(row=1, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
+        self.save_default_bw_time.grid(row=3, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
                                    sticky='nsew')
 
-        # Stimulus Dropdown Box
-        dropdown_values_stim = [f'Stimulus Start Number: {x}' for x in range(1, 101)]
-        self.option_var_stim = tk.StringVar(value=dropdown_values_stim[0])  # Set initial value to the prompt text
-        self.dropdown_stim = ctk.CTkOptionMenu(frame, variable=self.option_var_stim, values=dropdown_values_stim,
+
+        # IP Settings
+        ip_addresses = ['0.0.0.0', '192.168.1.253']
+        dropdown_values_ip = [f'IP Address: {x}' for x in ip_addresses]
+        self.option_var_ip_address = tk.StringVar(value=dropdown_values_ip[0])  # Set initial value to the prompt text
+        self.dropdown_ip_address = ctk.CTkOptionMenu(frame, variable=self.option_var_ip_address, values=dropdown_values_ip,
                                                font=(configuration.main_font_style, configuration.main_font_size),
-                                               fg_color=configuration.dropdown_fg_color, dropdown_hover_color=configuration.button_hover_color)
-        self.dropdown_stim.grid(row=2, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting, sticky='nsew')
+                                               fg_color=configuration.dropdown_fg_color,
+                                               dropdown_hover_color=configuration.button_hover_color)
+        self.dropdown_ip_address.grid(row=4, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
+                                sticky='nsew')
+
+        # IP Button
+        self.load_ip_button = ctk.CTkButton(frame, text='Change Default',
+                                              font=(configuration.main_font_style, configuration.main_font_size),
+                                              fg_color=configuration.button_fg_color,
+                                              hover_color=configuration.button_hover_color,
+                                              command=lambda: self.event_handler(Event.SET_IP_ADDRESS))
+        self.load_ip_button.grid(row=5, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
+                                   sticky='nsew')
+
+        # Port Settings
+        port_nums = ['12345', '99999', '86868']
+        dropdown_values_port = [f'Port Number: {x}' for x in port_nums]
+        self.option_var_port = tk.StringVar(value=dropdown_values_port[0])  # Set initial value to the prompt text
+        self.dropdown_port = ctk.CTkOptionMenu(frame, variable=self.option_var_port, values=dropdown_values_port,
+                                               font=(configuration.main_font_style, configuration.main_font_size),
+                                               fg_color=configuration.dropdown_fg_color,
+                                               dropdown_hover_color=configuration.button_hover_color)
+        self.dropdown_port.grid(row=6, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
+                                sticky='nsew')
 
         # Load Stim Button
-        self.load_stim_button = ctk.CTkButton(frame, text='Load', font=(configuration.main_font_style, configuration.main_font_size),
-                                              fg_color=configuration.button_fg_color, hover_color=configuration.button_hover_color,
-                                              command=lambda: self.event_handler(Event.SET_STIM_NUMBER))
-        self.load_stim_button.grid(row=3, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting, sticky='nsew')
-
-
-
+        self.load_port_button = ctk.CTkButton(frame, text='Change Default',
+                                              font=(configuration.main_font_style, configuration.main_font_size),
+                                              fg_color=configuration.button_fg_color,
+                                              hover_color=configuration.button_hover_color,
+                                              command=lambda: self.event_handler(Event.SET_PORT_NUM))
+        self.load_port_button.grid(row=7, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
+                                   sticky='nsew')
 
