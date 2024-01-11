@@ -65,9 +65,10 @@ class VR_Headset_Hardware:
                     break
 
 
-                selection = decoded_message.split(' ')
-                self.selected_speaker = selection[0].strip()
-                self.degree_error = selection[1].strip()
+                # selection = decoded_message.split(' ')
+                selection = decoded_message.strip()
+                self.selected_speaker = selection
+                self.degree_error = 0
                 self.num_selections += 1
 
                 if reaction_timer:
