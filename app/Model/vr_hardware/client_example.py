@@ -69,6 +69,8 @@ if __name__ == "__main__":
         ip_address = '192.168.1.253'
     elif ip_input == '3':
         ip_address = '141.225.179.76'
+    elif ip_input == '4':
+        ip_address = '10.101.124.126'
     else: ip_address = ip_input
 
     # client = Client_Class('127.0.0.1', 12345)
