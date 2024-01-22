@@ -74,8 +74,8 @@ class VR_Headset_Hardware:
                 if reaction_timer:
                     self.time_selection_given = reaction_timer.reaction_time()
 
-                print(f'Selected Speaker: {self.selected_speaker} | Degree Error: {self.degree_error}'
-                      f' | React Time: {self.time_selection_given} | Num Sel: {self.num_selections}')
+                # print(f'Selected Speaker: {self.selected_speaker} | Degree Error: {self.degree_error}'
+                #       f' | React Time: {self.time_selection_given} | Num Sel: {self.num_selections}')
 
             except socket.error:
                 # No data available, sleep briefly to prevent high CPU usage
