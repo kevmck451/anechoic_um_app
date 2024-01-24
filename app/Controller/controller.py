@@ -233,7 +233,7 @@ class Controller:
                                    self.settings_file.get_setting('port')),
                              daemon=True)
         load_thread.start()
-        wait_time = 40
+        wait_time = 20
         while self.vr_hardware.headset_state == False:
             if self.vr_hardware.initialize == False:
                 break
