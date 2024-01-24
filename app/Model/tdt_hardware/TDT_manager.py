@@ -64,6 +64,7 @@ class TDT_Circuit:
 
         self.circuit.set_tag("chan", channel)
         self.circuit.trigger(trigger=1)
+        sd.play(audio_sample.data, audio_sample.sample_rate)
 
         time.sleep(audio_sample.sample_length)
         time.sleep(time_bw_samples)
