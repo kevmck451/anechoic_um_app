@@ -58,13 +58,12 @@ class TDT_Circuit:
 
 
     def trigger_audio_sample(self, audio_sample, channel, time_bw_samples):
-
         speaker_buffer = self.circuit.get_buffer(data_tag='speaker', mode='w')
         speaker_buffer.set(audio_sample.data)
-
+        sd.play(audio_sample.data, audio_sample.sample_rate)
         self.circuit.set_tag("chan", channel)
         self.circuit.trigger(trigger=1)
-        sd.play(audio_sample.data, audio_sample.sample_rate)
+
 
         time.sleep(audio_sample.sample_length)
         time.sleep(time_bw_samples)
