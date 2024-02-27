@@ -59,10 +59,10 @@ class VR_Headset_Hardware:
                 message = self.client_socket.recv(1024)
                 decoded_message = message.decode('utf-8')
 
-                if not message:
-                    print("Disconnecting...")
-                    self.disconnect_hardware()
-                    break
+                # if not message:
+                #     print("Disconnecting...")
+                #     self.disconnect_hardware()
+                #     break
 
                 # selection = decoded_message.split(' ')
                 selection = decoded_message.strip()
