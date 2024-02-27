@@ -64,7 +64,6 @@ class VR_Headset_Hardware:
                     self.disconnect_hardware()
                     break
 
-
                 # selection = decoded_message.split(' ')
                 selection = decoded_message.strip()
                 self.selected_speaker = selection
@@ -91,11 +90,18 @@ class VR_Headset_Hardware:
         if reaction_timer:
             self.time_selection_given = reaction_timer.reaction_time()
 
+    def heart_beat(self, stop_event):
+        while not stop_event.is_set():
+            self.client_socket.sendall("hb".encode('utf-8'))
+            time.sleep(30)
+
     def get_vr_input(self):
         if self.headset_state:
             # Start the thread for receiving messages
             self.message_thread = Thread(target=self.update_vr_input_values, daemon=True)
             self.message_thread.start()
+            self.heart_beat = Thread(target=self.heart_beat, daemon=True)
+            self.heart_beat.start()
 
 
 
