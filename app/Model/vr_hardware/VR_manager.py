@@ -51,8 +51,7 @@ class VR_Headset_Hardware:
 
     def update_vr_input_values(self, stop_event, **kwargs):
         self.client_socket.setblocking(0)  # Set the socket to non-blocking
-        self.heart_beat = Thread(target=self.heart_beat, args=(stop_event, ), daemon=True)
-        self.heart_beat.start()
+        self.heart_beat()
 
         reaction_timer = kwargs.get('reaction_timer', None)
 
@@ -92,10 +91,8 @@ class VR_Headset_Hardware:
         if reaction_timer:
             self.time_selection_given = reaction_timer.reaction_time()
 
-    def heart_beat(self, stop_event):
-        while not stop_event.is_set():
-            self.client_socket.send("hb".encode('utf-8'))
-            time.sleep(30)
+    def heart_beat(self):
+        self.client_socket.send("hb".encode('utf-8'))
 
     def get_vr_input(self):
         if self.headset_state:
