@@ -549,7 +549,7 @@ class Main_Frame(ctk.CTkFrame):
 
     def update_speaker_selected_number(self):
         self.event_handler(Event.CHANNEL_SEL_NUMBER)
-        if self.current_speaker_selected_number == 0 or self.current_speaker_selected_number == 'hb': text = ''
+        if self.current_speaker_selected_number == 0 or 'hb' in self.current_speaker_selected_number: text = ''
         else: text = self.current_speaker_selected_number
         self.selection_made_display.configure(text=text)
         self.update_speaker_sel_id = self.after(10, self.update_speaker_selected_number)
