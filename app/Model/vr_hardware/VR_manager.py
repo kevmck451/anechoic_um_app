@@ -35,8 +35,6 @@ class VR_Headset_Hardware:
             self.server_socket.settimeout(None)  # Remove the timeout after connection
             print(f"Connection from {addr} has been established.")
             self.headset_state = True
-            self.heart_beat = Thread(target=self.heart_beat, daemon=True)
-            self.heart_beat.start()
         except socket.timeout:
             print("Connection attempt timed out.")
             self.headset_state = False
@@ -53,6 +51,8 @@ class VR_Headset_Hardware:
 
     def update_vr_input_values(self, stop_event, **kwargs):
         self.client_socket.setblocking(0)  # Set the socket to non-blocking
+        self.heart_beat = Thread(target=self.heart_beat, args=(stop_event, ), daemon=True)
+        self.heart_beat.start()
 
         reaction_timer = kwargs.get('reaction_timer', None)
 
