@@ -92,7 +92,7 @@ class VR_Headset_Hardware:
 
     def heart_beat(self, stop_event):
         while not stop_event.is_set():
-            self.client_socket.sendall("hb".encode('utf-8'))
+            self.client_socket.send("hb".encode('utf-8'))
             time.sleep(30)
 
     def get_vr_input(self):
