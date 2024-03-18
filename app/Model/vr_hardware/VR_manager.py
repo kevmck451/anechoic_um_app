@@ -67,6 +67,7 @@ class VR_Headset_Hardware:
 
                 # selection = decoded_message.split(' ')
                 selection = decoded_message.strip()
+                # updated selection criteria to remove heartbeat
                 if selection == 'hb' or 'h' in selection or 'b' in selection: continue
                 else:
                     self.selected_speaker = selection
