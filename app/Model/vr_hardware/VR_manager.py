@@ -67,7 +67,7 @@ class VR_Headset_Hardware:
 
                 # selection = decoded_message.split(' ')
                 selection = decoded_message.strip()
-                if selection == 'hb': continue
+                if selection == 'hb' or 'h' in selection or 'b' in selection: continue
                 else:
                     self.selected_speaker = selection
                     self.degree_error = 0
