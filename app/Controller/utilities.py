@@ -57,7 +57,9 @@ class CSVFile_Experiment:
                 # Replace or insert the data at the specified row number
                 current_data[row_number] = data
         else:
-            raise IndexError("Row number out of bounds")
+            current_data.append(data)
+            # raise IndexError("Row number out of bounds")
+
 
         # Rewrite the file with the modified data
         with open(self.file_path, 'w', newline='') as csvfile:

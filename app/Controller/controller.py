@@ -390,7 +390,6 @@ class Controller:
         self.vr_hardware.selected_speaker = 0
         self.vr_hardware.num_selections = 0
         self.experiment.update_current_stim_number(self.experiment.current_index)
-        print(self.experiment.current_stim_number)
         self.gui.Main_Frame.start_experiment_timer()
         self.gui.Main_Frame.update_stim_number()
         self.gui.Main_Frame.update_speaker_projecting_number()
