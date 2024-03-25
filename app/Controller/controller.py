@@ -386,11 +386,11 @@ class Controller:
         self.output_file = CSVFile_Experiment(selected_value)
         self.warmup.set_audio_channel_list(self.audio_samples_list, self.channel_list)
         self.experiment.experiment_in_progress = False
-        self.experiment.current_index = 0
         self.experiment.max_index = 99
         self.vr_hardware.selected_speaker = 0
         self.vr_hardware.num_selections = 0
         self.experiment.update_current_stim_number(self.experiment.current_index)
+        print(self.experiment.current_stim_number)
         self.gui.Main_Frame.start_experiment_timer()
         self.gui.Main_Frame.update_stim_number()
         self.gui.Main_Frame.update_speaker_projecting_number()
@@ -458,6 +458,7 @@ class Controller:
         self.end_experiment()
 
     def end_experiment(self):
+        self.experiment.current_index = 0
         self.app_state = State.EXPERIMENT_ENDED
         self.experiment.current_index = ''
         self.experiment.current_speaker_projecting = ''
