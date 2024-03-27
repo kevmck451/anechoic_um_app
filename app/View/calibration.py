@@ -89,7 +89,7 @@ class Calibration_Frame(ctk.CTkFrame):
 
 
         # Stimulus Dropdown Box
-        dropdown_values_gain = [f'Gain Value: {x}' for x in range(1, 20)]
+        dropdown_values_gain = [f'Gain Value: {x}' for x in range(1, 21)]
         self.option_var_gain = tk.StringVar(value=dropdown_values_gain[0])  # Set initial value to the prompt text
         self.dropdown_gain = ctk.CTkOptionMenu(frame, variable=self.option_var_gain, values=dropdown_values_gain,
                                                   font=(configuration.main_font_style, configuration.main_font_size),
@@ -102,8 +102,8 @@ class Calibration_Frame(ctk.CTkFrame):
 
         self.play_pink_noise_button = ctk.CTkButton(frame, text='Play Pink Noise',
                                               font=(configuration.main_font_style, configuration.main_font_size),
-                                              fg_color=configuration.button_fg_color,
-                                              hover_color=configuration.button_hover_color,
+                                              fg_color=configuration.start_fg_color,
+                                              hover_color=configuration.start_hover_color,
                                               command=lambda: self.event_handler(Event.SET_STIM_NUMBER))
         self.play_pink_noise_button.grid(row=2, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
                                    sticky='nsew')

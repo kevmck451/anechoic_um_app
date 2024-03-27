@@ -91,9 +91,9 @@ y_pad_setting = 5
 # Calibration Window
 calibration_window_title = 'Speaker Calibration'
 calibration_window_width = 400
-calibration_window_height = 450
-calibration_min_window_width = 400
-calibration_min_window_height = 450
+calibration_window_height = 200
+calibration_min_window_width = calibration_window_width
+calibration_min_window_height = calibration_window_height
 
 
 
