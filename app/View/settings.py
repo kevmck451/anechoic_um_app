@@ -78,6 +78,7 @@ class Settings_Frame(ctk.CTkFrame):
         frame.grid_rowconfigure(5, weight=1)  # Row for the load button
         frame.grid_rowconfigure(6, weight=1)  # Row for the load button
         frame.grid_rowconfigure(7, weight=1)  # Row for the load button
+        frame.grid_rowconfigure(8, weight=1)  # Row for the load button
         frame.grid_columnconfigure(0, weight=1)  # Single column
 
         # Stimulus Dropdown Box
@@ -177,3 +178,11 @@ class Settings_Frame(ctk.CTkFrame):
         self.load_port_button.grid(row=7, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
                                    sticky='nsew')
 
+        # Calibration Button
+        self.calibration_button = ctk.CTkButton(frame, text='Calibrate Speakers',
+                                              font=(configuration.main_font_style, configuration.main_font_size),
+                                              fg_color=configuration.pause_fg_color,
+                                              hover_color=configuration.pause_hover_color,
+                                              command=lambda: self.event_handler(Event.CALIBRATION))
+        self.calibration_button.grid(row=8, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
+                                   sticky='nsew')

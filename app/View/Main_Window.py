@@ -309,6 +309,7 @@ class Main_Frame(ctk.CTkFrame):
                                         image=self.settings_icon, command=lambda: self.event_handler(Event.SETTINGS))
         self.settings_button.grid(row=2, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
 
+
     def experiment_metadata_frames_1(self, frame):
 
         frame.grid_columnconfigure(0, weight=1)

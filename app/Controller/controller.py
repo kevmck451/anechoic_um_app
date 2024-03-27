@@ -1,18 +1,24 @@
 
-from enum import Enum, auto
-from threading import Thread
-import time
-import threading
+
 
 from app.Model.tdt_hardware.TDT_manager import TDT_Circuit
 from app.Model.vr_hardware.VR_manager import VR_Headset_Hardware
 from app.Model.data_manager import circuit_data
 from app.Controller.experiment_state import Experiment
 from app.View.settings import Settings_Window
+from app.View.calibration import Calibration_Window
 from app.Controller.utilities import CSVFile_Experiment
 from app.Controller.utilities import CSVFile_Settings
 from app.Controller.events import Event
 from app.Controller.utilities import time_class
+
+
+from enum import Enum, auto
+from threading import Thread
+import time
+import threading
+
+
 
 class Controller:
     def __init__(self):
@@ -123,6 +129,16 @@ class Controller:
                 init_port = self.settings_file.get_setting('port')
                 self.settings_window = Settings_Window(self.handle_event, [init_tbs, init_ip, init_port])
                 self.settings_window.mainloop()
+
+        # Load from Specific Stimulus Number:
+        elif event == Event.CALIBRATION:
+            if self.app_state == self.app_state == State.IDLE or \
+                    self.app_state == State.EXPERIMENT_ENDED:
+                # init_tbs = self.settings_file.get_setting('time bw samples')
+                # init_ip = self.settings_file.get_setting('ip address')
+                # init_port = self.settings_file.get_setting('port')
+                self.calibration_window = Calibration_Window(self.handle_event, [])
+                self.calibration_window.mainloop()
 
         # Get Current Stim Number to Display
         elif event == Event.STIM_NUMBER:

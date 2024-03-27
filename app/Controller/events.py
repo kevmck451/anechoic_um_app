@@ -30,3 +30,4 @@ class Event(Enum):
     STOP_LOADING = auto()
     SET_IP_ADDRESS = auto()
     SET_PORT_NUM = auto()
+    CALIBRATION = auto()
