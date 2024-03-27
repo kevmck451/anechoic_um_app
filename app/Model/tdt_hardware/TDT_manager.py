@@ -37,10 +37,6 @@ class TDT_Circuit:
                 else:
                     self.circuit_state = False
 
-            # except DSPError as e:
-            #     self.circuit_state = False
-            #     pass
-
             except Exception as e:
                 print('connection attempt failed')
                 self.circuit_state = False
