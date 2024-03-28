@@ -9,12 +9,13 @@ from app.View.settings import Settings_Window
 from app.View.calibration import Calibration_Window
 from app.Controller.utilities import CSVFile_Experiment
 from app.Controller.utilities import CSVFile_Settings
-from app.Controller.events import Event
+from app.Controller.utilities import CSVFile_Calibration
 from app.Controller.utilities import time_class
-
+from app.Controller.events import Event
 
 from enum import Enum, auto
 from threading import Thread
+import numpy as np
 import time
 import threading
 
@@ -35,6 +36,7 @@ class Controller:
         self.stop_flag_raised = False
         self.pause_flag_raised = False
         self.settings_file = CSVFile_Settings()
+        self.gain_defaults = CSVFile_Calibration()
         self.audio_loading = False
 
     def set_gui(self, gui):
@@ -134,11 +136,15 @@ class Controller:
         elif event == Event.CALIBRATION:
             if self.app_state == self.app_state == State.IDLE or \
                     self.app_state == State.EXPERIMENT_ENDED:
-                # init_tbs = self.settings_file.get_setting('time bw samples')
-                # init_ip = self.settings_file.get_setting('ip address')
-                # init_port = self.settings_file.get_setting('port')
-                self.calibration_window = Calibration_Window(self.handle_event, [])
+                init_gain = self.gain_defaults.get_setting('gain')
+                init_gain_sub = self.gain_defaults.get_setting('gain sub')
+                init_speaker = self.gain_defaults.get_setting('speaker')
+                self.calibration_window = Calibration_Window(self.handle_event, [init_gain, init_gain_sub, init_speaker])
                 self.calibration_window.mainloop()
+
+        elif event == Event.PLAY_CALIBRATION_SAMPLE:
+            task_thread = Thread(target=self.play_calibration_sample, daemon=True)
+            task_thread.start()
 
         # Get Current Stim Number to Display
         elif event == Event.STIM_NUMBER:
@@ -500,8 +506,26 @@ class Controller:
         while self.pause_flag_raised and self.app_state == State.EXPERIMENT_PAUSED:
             time.sleep(0.1)
 
+    def play_calibration_sample(self):
+        speaker = int(self.calibration_window.Main_Frame.option_var_speaker.get().split(' ')[1])
+        gain = int(self.calibration_window.Main_Frame.option_var_gain.get().split(' ')[1])
+        gain_sub = np.round(float(self.calibration_window.Main_Frame.option_var_gain_sub.get()), 2)
+        total_gain = gain + gain_sub
+        time = int(self.calibration_window.Main_Frame.option_var_times.get().split(' ')[1])
+        audio_sample = circuit_data.load_calibration_sample(time)
 
 
+        # function to play sample with those arguments
+        if self.tdt_hardware.circuit_state == False:
+            audio_thread = Thread(target=self.tdt_hardware.trigger_audio_sample_computer,
+                                  args=(audio_sample, None), daemon=True)
+
+        else:
+            audio_thread = Thread(target=self.tdt_hardware.trigger_audio_sample,
+                                  args=(audio_sample, speaker, None), kwargs={'gain':total_gain},
+                                  daemon=True)
+
+        audio_thread.start()
 
 
 # Define the states using an enumeration

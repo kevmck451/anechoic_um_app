@@ -31,3 +31,4 @@ class Event(Enum):
     SET_IP_ADDRESS = auto()
     SET_PORT_NUM = auto()
     CALIBRATION = auto()
+    PLAY_CALIBRATION_SAMPLE = auto()

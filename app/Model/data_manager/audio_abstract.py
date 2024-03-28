@@ -147,4 +147,9 @@ class Audio_Abstract:
             plt.show()
 
 
+    def crop(self, time):
+        total_samples = int(time * self.sample_rate)
+        self.data = self.data[:total_samples]
+
+
 

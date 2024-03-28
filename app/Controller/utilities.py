@@ -109,6 +109,44 @@ class CSVFile_Settings:
             csvwriter.writerows(self.data)
 
 
+class CSVFile_Calibration:
+    def __init__(self):
+        current_script_dir = os.path.dirname(os.path.abspath(__file__))
+        new_path = os.path.join(current_script_dir, 'gain_defaults.csv')
+        self.csv_file_path = new_path
+
+    def _read_csv_file(self):
+        with open(self.csv_file_path, 'r', encoding='utf-8-sig') as csvfile:
+            csvreader = csv.reader(csvfile)
+            data = list(csvreader)
+        header = [column.strip('\ufeff') for column in data[0]]  # Remove the BOM character from the first column
+        return header, data[1:]
+
+    def get_setting(self, setting):
+        self.header, self.data = self._read_csv_file()
+        column_index = self.header.index(setting)
+        column_data = [row[column_index] for row in self.data]
+        return column_data[0]
+
+    def set_default_setting(self, setting_name, setting_value):
+        # Read the current data
+        self.header, self.data = self._read_csv_file()
+
+        # Find the index of the column for the setting_name
+        if setting_name in self.header:
+            column_index = self.header.index(setting_name)
+        else:
+            raise ValueError(f'Setting name "{setting_name}" not found in CSV header')
+
+        # Update the setting in the first row
+        self.data[0][column_index] = setting_value
+
+        # Write the updated data back to the CSV file
+        with open(self.csv_file_path, 'w', newline='', encoding='utf-8-sig') as csvfile:
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerow(self.header)
+            csvwriter.writerows(self.data)
+
 # TIME CLASS TO GIVE STATS ABOUT HOW LONG FUNCTION TAKES
 class time_class:
     def __init__(self, name):
