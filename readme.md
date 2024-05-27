@@ -3,6 +3,8 @@
 ## Overview
 This application was developed for the University of Memphis Hearing Aid Research Laboratory (HARL). It's designed for an experiment to test participants' ability to localize sounds. The experiment takes place in a state-of-the-art anechoic chamber using a multi-speaker array. Participants, wearing VR headsets, will listen to speech from various speakers and identify the source of the sound from nine gender-neutral static avatars in the VR scene.
 
+![App Home](docs/App%20Pic%20V7a.JPG)
+
 ## Features
 - Multi-speaker array integration in an anechoic chamber.
 - VR environment with 9 avatars representing different sound sources.
@@ -73,3 +75,6 @@ This application was developed for the University of Memphis Hearing Aid Researc
     ```
     python -m app.app_main
     ```
+
+
+![App Home](docs/App%20Pic%20V7c.JPG)
