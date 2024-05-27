@@ -78,3 +78,4 @@ This application was developed for the University of Memphis Hearing Aid Researc
 
 
 ![App Home](docs/App%20Pic%20V7c.JPG)
+![App Home](docs/App%20Pic%20V8c.JPG)
