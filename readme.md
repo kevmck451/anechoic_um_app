@@ -10,7 +10,7 @@ This application was developed for the University of Memphis Hearing Aid Researc
 - VR environment with 9 avatars representing different sound sources.
 - Real-time tracking of participants' choices and reaction times.
 - Background noise variation to study the impact of ambient noise on sound localization.
-- 
+
 ![App Home](docs/participant_example_1.jpg)
 
 ## Installation and Setup
