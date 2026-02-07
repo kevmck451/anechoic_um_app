@@ -1,0 +1,17 @@
+﻿audio_name,audio_number,burst_type,speaker
+grass,1,HP_1,6
+grass,2,HP_1,6
+grass,3,HP_1,6
+grass,4,HP_1,6
+grass,5,HP_1,6
+window,1,HP_1,6
+window,2,HP_1,6
+window,3,HP_1,6
+window,4,LP_1,6
+Window,5,LP_1,6
+dove,1,LP_1,6
+dove,2,LP_1,6
+dove,3,LP_1,6
+dove,4,LP_1,6
+dove,5,LP_1,6
+owl,1,LP_1,6

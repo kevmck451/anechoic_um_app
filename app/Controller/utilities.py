@@ -23,7 +23,7 @@ class CSVFile_Experiment:
         csv_file_path = os.path.join(output_path, f'{file_name}_Ex{exp_num}.csv')
 
         # Headers for the CSV file
-        headers = ["stimulus number", "sample played", "speaker projected", "speaker selected", "reaction time",
+        headers = ["stimulus row", "sample played", "burst played","speaker projected", "speaker selected", "reaction time",
                    "number selections"]
 
         # Open the file in write mode and create a CSV writer object

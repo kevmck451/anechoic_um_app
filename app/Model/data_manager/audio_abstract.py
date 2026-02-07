@@ -42,16 +42,7 @@ class Audio_Abstract:
 
 
     def __str__(self):
-        return f'---------Audio Object---------\n' \
-               f'path: {self.path}\n' \
-               f'name: {self.name}\n' \
-               f'sample_rate: {self.sample_rate} Hz\n' \
-               f'num_channels: {self.num_channels}\n' \
-               f'sample_length: {self.sample_length} s\n' \
-               f'num_samples: {self.num_samples}\n' \
-               f'data type: {self.data.dtype}\n' \
-               f'data shape: {self.data.shape}\n' \
-               f'data: {self.data}'
+        return f'{self.name}'
 
     # Function that loads data from filepath
     def load_data(self, filepath):
@@ -150,6 +141,15 @@ class Audio_Abstract:
     def crop(self, time):
         total_samples = int(time * self.sample_rate)
         self.data = self.data[:total_samples]
+
+    def combine(self, audio):
+        self.data = np.concatenate((self.data, audio.data))
+        self.num_samples = len(self.data)
+        self.sample_length = round(self.num_samples / self.sample_rate, 2)
+        return self
+
+
+
 
 
 

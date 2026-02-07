@@ -4,10 +4,13 @@ import customtkinter as ctk
 import tkinter as tk
 import warnings
 from tkinter import ttk
+import os
+import re
 
 import app.View.configuration as configuration
 from app.Controller.events import Event
 from app.Controller.utilities import time_class
+from app.Model.data_manager.circuit_data import base_path
 
 
 
@@ -87,23 +90,55 @@ class Console_Frame(ctk.CTkFrame):
         text_color = kwargs.get('text_color', 'black')
         number = kwargs.get('number', None)
         bg_color = kwargs.get('bg_color', None)
+        start_index = kwargs.get('start_index', 0)
 
         self.main_info_label.configure(text=f"Sample Audio Order: Experiment {experiment}")
-        for i, data in enumerate(new_data):
-            if i + 1 == number:
-                self.stim_labels[i].configure(text=f"Stim {number}: {str(data).title()} ", text_color=text_color,
-                                               bg_color='#B8B9B8')
+
+        # Update every label so old rows/icons don't stick around
+        for i, lbl in enumerate(self.stim_labels):
+
+            # Past the end of the list: show NOTHING
+            if i >= len(new_data) or new_data[i] == '':
+                lbl.configure(text='', image='', compound=None)
+                continue
+
+            stim_number = start_index + i + 1
+
+            if stim_number == number:
+                lbl.configure(
+                    text=f"Stim {stim_number}: {str(new_data[i])} ",
+                    text_color=text_color,
+                    bg_color='#B8B9B8',
+                    image='',
+                    compound=None
+                )
             elif bg_color is not None:
-                self.stim_labels[i].configure(text=f"Stim {i + 1}: {str(data).title()} ", text_color='black',
-                                               bg_color=bg_color)
+                lbl.configure(
+                    text=f"Stim {stim_number}: {str(new_data[i])} ",
+                    text_color='black',
+                    bg_color=bg_color,
+                    image='',
+                    compound=None
+                )
             else:
-                self.stim_labels[i].configure(text=f"Stim {i + 1}: {str(data).title()} ", text_color='black')
+                lbl.configure(
+                    text=f"Stim {stim_number}: {str(new_data[i])} ",
+                    text_color='black',
+                    image='',
+                    compound=None
+                )
 
     def reset_console_box(self):
         self.main_info_label.configure(text="Sample Audio Order:")
         for i, label in enumerate(self.stim_labels):
             label.configure(text=f"Stim {i + 1}:", text_color='black', bg_color='#CFCFCF', image='')
 
+    def _gui_update_console_page(self, page, exp_id, start_index):
+        self.update_console_box(
+            page,
+            experiment=exp_id,
+            start_index=start_index
+        )
 
 
 class Main_Frame(ctk.CTkFrame):
@@ -127,6 +162,7 @@ class Main_Frame(ctk.CTkFrame):
         self.update_console_displays_id = None
         self.vr_hardware_id = None
 
+        self.previous_group_state = -1
 
         self.current_stim_number = ''
         self.current_speaker_projecting_number = ''
@@ -237,8 +273,23 @@ class Main_Frame(ctk.CTkFrame):
         frame.grid_rowconfigure(1, weight=1)  # Row for the load button
         frame.grid_columnconfigure(0, weight=1)  # Single column
 
+        def max_experiment_number():
+            exp_dir = base_path("experiment files/experiments")
+            pattern = re.compile(r"^experiment_(\d+)\.csv$")
+            max_num = 0
+
+            for name in os.listdir(exp_dir):
+                match = pattern.match(name)
+                if match:
+                    num = int(match.group(1))
+                    if num > max_num:
+                        max_num = num
+
+            return int(max_num)
+
         # Dropdown Box
-        dropdown_values_exp = ['Select an Experiment'] + [f'Experiment {x}' for x in range(1, 21)]
+        number_of_experiments = max_experiment_number()
+        dropdown_values_exp = ['Select an Experiment'] + [f'Experiment {x}' for x in range(1, (number_of_experiments+1))]
         self.option_var_exp = tk.StringVar(value=dropdown_values_exp[0])  # Set initial value to the prompt text
         self.dropdown_exp = ctk.CTkOptionMenu(frame, variable=self.option_var_exp, values=dropdown_values_exp,
                                               font=(configuration.main_font_style, configuration.main_font_size),
@@ -308,7 +359,6 @@ class Main_Frame(ctk.CTkFrame):
                                         fg_color=configuration.pause_fg_color, hover_color=configuration.pause_hover_color,
                                         image=self.settings_icon, command=lambda: self.event_handler(Event.SETTINGS))
         self.settings_button.grid(row=2, column=0, padx=configuration.x_pad_2, pady=configuration.y_pad_2, sticky='nsew')
-
 
     def experiment_metadata_frames_1(self, frame):
 
@@ -615,13 +665,19 @@ class Main_Frame(ctk.CTkFrame):
 
     # EXPERIMENT VIEWS ------------------------
     def update_console_display(self):
-        get_group_number = lambda index: (int(index)-1) // 5
-        self.console_frame.group_number = get_group_number(self.current_stim_number)
-        if self.console_frame.group_number != 21:
-            self.console_frame.stim_labels[self.previous_group_state].configure(image='')
-            self.console_frame.stim_labels[self.console_frame.group_number].configure(image=self.playing_icon_s, compound='right')
+        n = len(self.console_frame.stim_labels)
 
-        self.previous_group_state = self.console_frame.group_number
+        # row cycles 0..n-1 as current_stim_number increments
+        row = (int(self.current_stim_number) - 1) % n
+
+        # clear previous icon (only if valid)
+        if 0 <= self.previous_group_state < n:
+            self.console_frame.stim_labels[self.previous_group_state].configure(image='', compound=None)
+
+        # set current icon
+        self.console_frame.stim_labels[row].configure(image=self.playing_icon_s, compound='right')
+
+        self.previous_group_state = row
         self.update_console_displays_id = self.after(100, self.update_console_display)
 
     def stop_update_console_display(self):

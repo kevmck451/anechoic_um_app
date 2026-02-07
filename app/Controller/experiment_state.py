@@ -6,6 +6,8 @@ class Experiment:
     def __init__(self):
         self.audio_sample_list = list
         self.channel_list = list
+        self.audio_burst_list = list
+        self.experiment_id = int
 
         self.current_index = 0
         self.current_stim_number = ''
@@ -24,9 +26,10 @@ class Experiment:
     def update_current_stim_number(self, number):
         self.current_stim_number = str(number + 1)
 
-    def set_audio_channel_list(self, audio_samples_list, channel_list):
+    def set_audio_channel_list(self, audio_samples_list, audio_burst_list, channel_list):
         self.audio_sample_list = audio_samples_list
         self.channel_list = channel_list
+        self.audio_burst_list = audio_burst_list
 
 
 

@@ -24,10 +24,11 @@ import threading
 class Controller:
     def __init__(self):
         self.app_state = State.IDLE
-        self.sample_names_list = list
-        self.audio_samples_list = list
-        self.channel_list = list
-        self.loaded_experiment_name = str
+        self.sample_names_list = []
+        self.audio_samples_list = []
+        self.channel_list = []
+        self.audio_burst_list = []
+        self.loaded_experiment_name = 'Select an Experiment'
         self.experiment_loaded = False
         self.tdt_hardware = TDT_Circuit()
         self.vr_hardware = VR_Headset_Hardware()
@@ -36,8 +37,11 @@ class Controller:
         self.stop_flag_raised = False
         self.pause_flag_raised = False
         self.settings_file = CSVFile_Settings()
+        self.audio_testing = int(self.settings_file.get_setting('test_audio'))
         self.gain_defaults = CSVFile_Calibration()
         self.audio_loading = False
+        self.gui_sample_list_max_showing = 20
+
 
     def set_gui(self, gui):
         self.gui = gui
@@ -129,7 +133,8 @@ class Controller:
                 init_tbs = self.settings_file.get_setting('time bw samples')
                 init_ip = self.settings_file.get_setting('ip address')
                 init_port = self.settings_file.get_setting('port')
-                self.settings_window = Settings_Window(self.handle_event, [init_tbs, init_ip, init_port])
+                init_audio = self.settings_file.get_setting('test_audio')
+                self.settings_window = Settings_Window(self.handle_event, [init_tbs, init_ip, init_port, init_audio])
                 self.settings_window.mainloop()
 
         # Load from Specific Stimulus Number:
@@ -199,6 +204,12 @@ class Controller:
             value = self.settings_window.Main_Frame.option_var_port.get()
             value = str(value.split(':')[1].strip())
             self.settings_file.set_default_setting('port', value)
+
+        elif event == Event.SET_AUDIO_LOCATION:
+            # get value selected and set default
+            value = self.settings_window.Main_Frame.use_test_audio_var.get()
+            self.settings_file.set_default_setting('test_audio', int(value))
+
 
         # Get Initial Time before Samples
         elif event == Event.GET_INITIAL_TBS:
@@ -304,20 +315,26 @@ class Controller:
 
     def load_experiment(self, selected_value):
         exp_num = selected_value.split(' ')[1]
-        self.sample_names_list = circuit_data.load_audio_names(exp_num)
         self.audio_loading = True
         self.gui.Main_Frame.manage_loading_audio_popup(text="Loading audio samples, please wait...", show=True)
         load_thread = Thread(target=self.load_audio_samples, args=(exp_num,), daemon=True)
         load_thread.start()
 
     def load_audio_samples(self, experiment_id):
-        self.audio_samples_list = circuit_data.load_audio_samples(experiment_id)
+        self.experiment.experiment_id = experiment_id
+        self.audio_testing = int(self.settings_file.get_setting('test_audio'))
+        self.audio_samples_list = circuit_data.load_audio_samples(experiment_id, self.audio_testing)
         self.channel_list = circuit_data.load_channel_numbers(experiment_id)
+        self.audio_burst_list = circuit_data.load_bursts(experiment_id)
+        self.sample_names_list = [
+            "{} {}".format(audio_name.title(), burst_name)
+            for audio_name, burst_name in zip(circuit_data.load_audio_names(experiment_id), self.audio_burst_list)
+        ]
 
         if self.audio_loading:
-            self.experiment.set_audio_channel_list(self.audio_samples_list, self.channel_list)
+            self.experiment.set_audio_channel_list(self.audio_samples_list, self.audio_burst_list, self.channel_list)
             self.experiment_loaded = True
-            self.gui.Console_Frame.update_console_box(self.sample_names_list, experiment=experiment_id)
+            self.gui.Console_Frame.update_console_box(self.sample_names_list[:self.gui_sample_list_max_showing], experiment=experiment_id)
             self.gui.Main_Frame.close_loading_popup()
             self.app_state = State.IDLE
             self.audio_loading = False
@@ -325,8 +342,9 @@ class Controller:
     def start_warmup(self):
         self.app_state = State.WARMUP_RUNNING
         self.gui.Main_Frame.toggle_warmup_button()
-        warmup_audio, warmup_channels = circuit_data.load_warmup_data()
-        self.warmup.set_audio_channel_list(warmup_audio, warmup_channels)
+        self.audio_testing = int(self.settings_file.get_setting('test_audio'))
+        warmup_audio, warmup_bursts, warmup_channels = circuit_data.load_warmup_data(self.audio_testing)
+        self.warmup.set_audio_channel_list(warmup_audio, warmup_bursts, warmup_channels)
         self.warmup.experiment_in_progress = False
 
         self.warmup.current_index = 0
@@ -348,7 +366,14 @@ class Controller:
             if self.warmup.experiment_in_progress == False:
                 self.warmup.experiment_in_progress = True
 
-                audio_sample = self.warmup.audio_sample_list[self.warmup.current_index]
+                # audio_sample = self.warmup.audio_sample_list[self.warmup.current_index]
+                audio_burst = self.warmup.audio_burst_list[self.warmup.current_index]
+                audio_stimulus = self.warmup.audio_sample_list[self.warmup.current_index]
+                if isinstance(audio_burst, str):
+                    audio_sample = audio_stimulus
+                else:
+                    audio_sample = audio_burst.combine(audio_stimulus)
+
                 channel_num = self.warmup.channel_list[self.warmup.current_index]
                 self.warmup.current_speaker_projecting = channel_num
 
@@ -406,9 +431,9 @@ class Controller:
         self.gui.Main_Frame.toggle_start_button()
         selected_value = self.gui.Main_Frame.option_var_exp.get().split(' ')[1]
         self.output_file = CSVFile_Experiment(selected_value)
-        self.warmup.set_audio_channel_list(self.audio_samples_list, self.channel_list)
+        self.warmup.set_audio_channel_list(self.audio_samples_list, self.audio_burst_list, self.channel_list)
         self.experiment.experiment_in_progress = False
-        self.experiment.max_index = 99
+        self.experiment.max_index = int(len(self.audio_samples_list))
         self.vr_hardware.selected_speaker = 0
         self.vr_hardware.num_selections = 0
         self.experiment.update_current_stim_number(self.experiment.current_index)
@@ -421,14 +446,34 @@ class Controller:
         task_thread.start()
 
     def perform_experiment_rounds(self):
-        while self.experiment.current_index <= self.experiment.max_index:
+        stim_display_value = 20
+        while self.experiment.current_index <= (self.experiment.max_index-1):
+            if self.experiment.current_index >= stim_display_value:
+                page = self.sample_names_list[stim_display_value:stim_display_value + self.gui_sample_list_max_showing]
+                page = page + [''] * (self.gui_sample_list_max_showing - len(page))
+
+                exp_id = self.experiment.experiment_id
+                start = stim_display_value
+
+                self.gui.after(0, lambda p=page, e=exp_id, s=start:
+                self.gui.Console_Frame.update_console_box(p, experiment=e, start_index=s)
+                               )
+
+                stim_display_value += self.gui_sample_list_max_showing
+
+
             if self.experiment.experiment_in_progress == False:
                 reaction_timer = time_class('reaction timer')
-                if self.experiment.current_index < 101:
+                if self.experiment.current_index < (self.experiment.max_index+1):
                     self.experiment.update_current_stim_number(self.experiment.current_index)
                 self.experiment.experiment_in_progress = True
 
-                audio_sample = self.experiment.audio_sample_list[self.experiment.current_index]
+                audio_burst = self.experiment.audio_burst_list[self.experiment.current_index]
+                audio_stimulus = self.experiment.audio_sample_list[self.experiment.current_index]
+                if isinstance(audio_burst, str):
+                    audio_sample = audio_stimulus
+                else:
+                    audio_sample = audio_burst.combine(audio_stimulus)
                 channel_num = self.experiment.channel_list[self.experiment.current_index]
                 self.experiment.current_speaker_projecting = channel_num
 
@@ -464,9 +509,13 @@ class Controller:
                 reaction_time = self.vr_hardware.time_selection_given
                 num_selections = self.vr_hardware.num_selections
                 self.output_file.write_row_at(int(self.experiment.current_index),
-                                              [self.experiment.current_stim_number, audio_sample.name, channel_num,
+                                              [self.experiment.current_stim_number,
+                                               str(audio_stimulus),
+                                               str(audio_burst),
+                                               channel_num,
                                                speaker_selected,
-                                               reaction_time, num_selections])
+                                               reaction_time,
+                                               num_selections])
 
                 self.vr_hardware.selected_speaker = 0
                 self.vr_hardware.num_selections = 0
@@ -481,7 +530,7 @@ class Controller:
     def end_experiment(self):
         self.experiment.current_index = 0
         self.app_state = State.EXPERIMENT_ENDED
-        self.experiment.current_index = ''
+        self.experiment.current_stim_number = ''
         self.experiment.current_speaker_projecting = ''
         self.experiment.current_speaker_selected = ''
         self.gui.Main_Frame.stop_experiment_timer()

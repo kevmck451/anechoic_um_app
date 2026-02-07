@@ -18,109 +18,101 @@ def base_path(relative_path):
 # _________________________________________________
 # Build list of exp names
 def load_audio_names(experiment_number):
-
-    audio_csv_filepath = base_path('experiment files/samples.csv')
+    audio_csv_filepath = base_path(f'experiment files/experiments/experiment_{experiment_number}.csv')
     audio_csv = CSVFile(file_path=audio_csv_filepath)
-    sample_numbers = audio_csv.get_column(column_name=f'ex{experiment_number}')
-
-    sample_names = {'1': 'cactus',
-                    '2': 'donkey',
-                    '3': 'dove',
-                    '4': 'envelope',
-                    '5': 'glove',
-                    '6': 'glue',
-                    '7': 'grass',
-                    '8': 'grasshopper',
-                    '9': 'guitar',
-                    '10': 'ice',
-                    '11': 'lemon',
-                    '12': 'lettuce',
-                    '13': 'nail',
-                    '14': 'orange',
-                    '15': 'owl',
-                    '16': 'vegetable',
-                    '17': 'violin',
-                    '18': 'window',
-                    '19': 'woodpecker',
-                    '20': 'zebra'}
+    sample_names = audio_csv.get_column(column_name='audio_name')
+    sample_numbers = audio_csv.get_column(column_name='audio_number')
 
     sample_names_list = []
-    for number in sample_numbers:
-        sample_name = sample_names.get(number)
-        sample_names_list.append(sample_name)
+    for name, number in zip(sample_names, sample_numbers):
+        audio_title = f'{name}_{number}'
+        sample_names_list.append(audio_title)
 
     return sample_names_list
 
 # Build list of audio objects in correct order from file
-def load_audio_samples(experiment_number):
+def load_audio_samples(experiment_number, testing_audio):
+    sample_names_list = load_audio_names(experiment_number)
 
-    audio_csv_filepath = base_path('experiment files/samples.csv')
-    audio_csv = CSVFile(file_path=audio_csv_filepath)
-    sample_numbers = audio_csv.get_column(column_name=f'ex{experiment_number}')
-
-    sample_names = {'1': 'cactus',
-                    '2': 'donkey',
-                    '3': 'dove',
-                    '4': 'envelope',
-                    '5': 'glove',
-                    '6': 'glue',
-                    '7': 'grass',
-                    '8': 'grasshopper',
-                    '9': 'guitar',
-                    '10': 'ice',
-                    '11': 'lemon',
-                    '12': 'lettuce',
-                    '13': 'nail',
-                    '14': 'orange',
-                    '15': 'owl',
-                    '16': 'vegetable',
-                    '17': 'violin',
-                    '18': 'window',
-                    '19': 'woodpecker',
-                    '20': 'zebra'}
     audio_sample_buffer = []
 
-    for number in sample_numbers:
-        sample_name = sample_names.get(number)
+    for sample_name in sample_names_list:
 
-        # print(sample_name)
-        for i in range(1, 6):
-            audio_name = f'{sample_name}_{i}.wav'
-            # print(audio_name)
+        audio_name = f'{sample_name}.wav'
+        # print(audio_name)
+        if testing_audio:
+            filepath = base_path('experiment files/audio_testing')
+        else:
             filepath = base_path('experiment files/audio')
-            audio = Audio_Abstract(filepath=f'{filepath}/{audio_name}')
-            # print(audio.num_channels)
-            audio_sample_buffer.append(audio)
+
+        audio = Audio_Abstract(filepath=f'{filepath}/{audio_name}')
+        # print(audio.num_channels)
+        audio_sample_buffer.append(audio)
 
     return audio_sample_buffer
 
 # Build list of channels to play samples from
 def load_channel_numbers(experiment_number):
 
-    channel_csv_filepath = base_path('experiment files/channels.csv')
+    channel_csv_filepath = base_path(f'experiment files/experiments/experiment_{experiment_number}.csv')
     channel_csv = CSVFile(file_path=channel_csv_filepath)
-    channel_numbers = channel_csv.get_column(column_name=f'ex{experiment_number}')
+    channel_numbers = channel_csv.get_column(column_name='speaker')
 
     return channel_numbers
 
-# Build list of test data
-def load_warmup_data():
-    sample_name = 'lakes'
+# Build list of bursts
+def load_bursts(experiment_number):
+    audio_csv_filepath = base_path(f'experiment files/experiments/experiment_{experiment_number}.csv')
+    audio_csv = CSVFile(file_path=audio_csv_filepath)
+    sample_names = audio_csv.get_column(column_name='burst_type')
+
+    sample_names_list = [name for name in sample_names]
     audio_sample_buffer = []
 
-    for i in range(1, 6):
-        audio_name = f'{sample_name}_{i}.wav'
-        # print(audio_name)
+    for sample_name in sample_names_list:
+        if sample_name.lower() == 'none':
+            audio_sample_buffer.append('none')
+        else:
+            audio_name = f'{sample_name}.wav'
+            # print(audio_name)
+            filepath = base_path('experiment files/audio_bursts')
+            audio = Audio_Abstract(filepath=f'{filepath}/{audio_name}')
+            # print(audio.num_channels)
+            audio_sample_buffer.append(audio)
 
-        filepath = base_path('experiment files/audio')
+    return audio_sample_buffer
+
+
+# Build list of test data
+def load_warmup_data(testing_audio):
+    warmup_csv_filepath = base_path(f'experiment files/warmup.csv')
+    warmup_csv = CSVFile(file_path=warmup_csv_filepath)
+    sample_names = warmup_csv.get_column(column_name='audio_name')
+    sample_numbers = warmup_csv.get_column(column_name='audio_number')
+    burst_types = warmup_csv.get_column(column_name='burst_type')
+    channel_buffer = warmup_csv.get_column(column_name='speaker')
+
+    audio_sample_buffer = []
+    burst_buffer = []
+
+    for name, num, burst in zip(sample_names, sample_numbers, burst_types):
+        audio_name = f'{name}_{num}.wav'
+
+        if testing_audio:
+            filepath = base_path('experiment files/audio_testing')
+        else:
+            filepath = base_path('experiment files/audio')
         audio = Audio_Abstract(filepath=f'{filepath}/{audio_name}')
-        # print(audio.num_channels)
         audio_sample_buffer.append(audio)
 
-    channel_buffer = list(np.random.choice(range(1,10), size=5, replace=False))
-    random.shuffle(audio_sample_buffer)
+        if burst.lower() == 'none':
+            burst_buffer.append('none')
+        else:
+            filepath = base_path('experiment files/audio_bursts')
+            audio_burst = Audio_Abstract(filepath=f'{filepath}/{burst}.wav')
+            burst_buffer.append(audio_burst)
 
-    return audio_sample_buffer, channel_buffer
+    return audio_sample_buffer, burst_buffer, channel_buffer
 
 
 def load_calibration_sample(time):

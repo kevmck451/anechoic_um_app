@@ -79,6 +79,9 @@ class Settings_Frame(ctk.CTkFrame):
         frame.grid_rowconfigure(6, weight=1)  # Row for the load button
         frame.grid_rowconfigure(7, weight=1)  # Row for the load button
         frame.grid_rowconfigure(8, weight=1)  # Row for the load button
+        frame.grid_rowconfigure(9, weight=1)
+        frame.grid_rowconfigure(10, weight=1)
+
         frame.grid_columnconfigure(0, weight=1)  # Single column
 
         # Stimulus Dropdown Box
@@ -185,4 +188,31 @@ class Settings_Frame(ctk.CTkFrame):
                                               hover_color=configuration.pause_hover_color,
                                               command=lambda: self.event_handler(Event.CALIBRATION))
         self.calibration_button.grid(row=8, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
+                                   sticky='nsew')
+
+        # Use Test Audio checkbox
+        val = str(self.initial_value[3]).strip().lower()
+        use_test = val in ("1", "true", "yes", "y", "on")
+        self.use_test_audio_var = tk.BooleanVar(value=use_test)
+
+        self.use_test_audio_checkbox = ctk.CTkCheckBox(
+            frame,
+            text="Use Test Audio",
+            variable=self.use_test_audio_var,
+            onvalue=True,
+            offvalue=False,
+            font=(configuration.main_font_style, configuration.main_font_size),
+        )
+        self.use_test_audio_checkbox.grid(
+            row=9, column=0,
+            padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
+            sticky='w'
+        )
+
+        self.load_audio_button = ctk.CTkButton(frame, text='Change Default',
+                                              font=(configuration.main_font_style, configuration.main_font_size),
+                                              fg_color=configuration.button_fg_color,
+                                              hover_color=configuration.button_hover_color,
+                                              command=lambda: self.event_handler(Event.SET_AUDIO_LOCATION))
+        self.load_audio_button.grid(row=10, column=0, padx=configuration.x_pad_setting, pady=configuration.y_pad_setting,
                                    sticky='nsew')

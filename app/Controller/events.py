@@ -32,3 +32,4 @@ class Event(Enum):
     SET_PORT_NUM = auto()
     CALIBRATION = auto()
     PLAY_CALIBRATION_SAMPLE = auto()
+    SET_AUDIO_LOCATION = auto()
