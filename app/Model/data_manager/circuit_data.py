@@ -1,7 +1,6 @@
 
 from app.Model.data_manager.csv_class import CSVFile
-import numpy as np
-import random
+import soundfile as sf
 import os
 
 from app.Model.data_manager.audio_abstract import Audio_Abstract
@@ -16,6 +15,50 @@ def base_path(relative_path):
 # -------------------------------------------------
 # LOADING DATA   ----------------------------------
 # _________________________________________________
+
+def create_testing_audio(length_of_testing_audio):
+    audio_filepath = base_path('experiment files/audio')
+    audio_testing_filepath = base_path('experiment files/audio_testing')
+
+    os.makedirs(audio_testing_filepath, exist_ok=True)
+
+    audio_files = {
+        f for f in os.listdir(audio_filepath)
+        if f.lower().endswith(".wav")
+    }
+
+    testing_files = {
+        f for f in os.listdir(audio_testing_filepath)
+        if f.lower().endswith(".wav")
+    }
+
+    for fname in audio_files:
+        src = os.path.join(audio_filepath, fname)
+        dst = os.path.join(audio_testing_filepath, fname)
+
+        data, sr = sf.read(src)
+        target_len = int(length_of_testing_audio * sr)
+        trimmed = data[:target_len]
+
+        if fname not in testing_files:
+            sf.write(dst, trimmed, sr)
+            continue
+
+        existing, _ = sf.read(dst)
+
+        if len(existing) != target_len:
+            sf.write(dst, trimmed, sr)
+
+    for fname in testing_files - audio_files:
+        os.remove(os.path.join(audio_testing_filepath, fname))
+
+
+
+
+
+
+
+
 # Build list of exp names
 def load_audio_names(experiment_number):
     audio_csv_filepath = base_path(f'experiment files/experiments/experiment_{experiment_number}.csv')

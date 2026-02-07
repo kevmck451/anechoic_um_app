@@ -42,6 +42,10 @@ class Controller:
         self.audio_loading = False
         self.gui_sample_list_max_showing = 20
 
+        # function to compare audio with audio_testing
+        length_of_testing_audio = 2
+        circuit_data.create_testing_audio(length_of_testing_audio)
+
 
     def set_gui(self, gui):
         self.gui = gui
