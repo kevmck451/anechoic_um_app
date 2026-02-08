@@ -522,7 +522,7 @@ class Controller:
 
                 # calculate the total expected times
                 total_expected_time = round((burst_time + audio_stimulus.sample_length + time_bw), 2)
-                time_diff = round((reaction_time - total_expected_time), 3)
+                time_diff = round((reaction_time - total_expected_time), 2)
 
                 self.output_file.write_row_at(int(self.experiment.current_index),
                                               [self.experiment.current_stim_number,
@@ -533,7 +533,7 @@ class Controller:
                                                num_selections,
                                                reaction_time,
                                                burst_time,
-                                               audio_sample.sample_length,
+                                               round(audio_stimulus.sample_length,2),
                                                time_bw,
                                                total_expected_time,
                                                time_diff

@@ -1,9 +1,13 @@
-
+from app.Model.data_manager.audio_abstract import Audio_Abstract
+from app.Model.data_manager.audio_abstract import TARGET_SR
 from app.Model.data_manager.csv_class import CSVFile
+
+from scipy.signal import resample_poly
 import soundfile as sf
+import numpy as np
 import os
 
-from app.Model.data_manager.audio_abstract import Audio_Abstract
+
 
 def base_path(relative_path):
     current_script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,45 +20,50 @@ def base_path(relative_path):
 # LOADING DATA   ----------------------------------
 # _________________________________________________
 
+
+
+def normalize_audio_file(path, target_sr=TARGET_SR, target_sec=None):
+    # Always read as float32; make 2D so stereo/mono handled the same
+    data, sr = sf.read(str(path), dtype="float32", always_2d=True)  # (N, C)
+
+    # Resample if needed (this is the correct way to change sample rate)
+    if sr != target_sr:
+        data = resample_poly(data, up=target_sr, down=sr, axis=0)
+        sr = target_sr
+
+    # Enforce exact length if requested
+    if target_sec is not None:
+        target_len = int(round(target_sec * sr))
+        n = data.shape[0]
+        if n > target_len:
+            data = data[:target_len, :]
+        elif n < target_len:
+            pad = np.zeros((target_len - n, data.shape[1]), dtype=data.dtype)
+            data = np.vstack([data, pad])
+
+        # guarantee
+        assert data.shape[0] == target_len
+
+    return data, sr  # still 2D
+
+
 def create_testing_audio(length_of_testing_audio):
     audio_filepath = base_path('experiment files/audio')
     audio_testing_filepath = base_path('experiment files/audio_testing')
-
     os.makedirs(audio_testing_filepath, exist_ok=True)
 
-    audio_files = {
-        f for f in os.listdir(audio_filepath)
-        if f.lower().endswith(".wav")
-    }
-
-    testing_files = {
-        f for f in os.listdir(audio_testing_filepath)
-        if f.lower().endswith(".wav")
-    }
+    audio_files = {f for f in os.listdir(audio_filepath) if f.lower().endswith(".wav")}
+    testing_files = {f for f in os.listdir(audio_testing_filepath) if f.lower().endswith(".wav")}
 
     for fname in audio_files:
         src = os.path.join(audio_filepath, fname)
         dst = os.path.join(audio_testing_filepath, fname)
 
-        data, sr = sf.read(src)
-        target_len = int(length_of_testing_audio * sr)
-        trimmed = data[:target_len]
-
-        if fname not in testing_files:
-            sf.write(dst, trimmed, sr)
-            continue
-
-        existing, _ = sf.read(dst)
-
-        if len(existing) != target_len:
-            sf.write(dst, trimmed, sr)
+        data2d, sr = normalize_audio_file(src, target_sr=48828, target_sec=length_of_testing_audio)
+        sf.write(dst, data2d, sr)
 
     for fname in testing_files - audio_files:
         os.remove(os.path.join(audio_testing_filepath, fname))
-
-
-
-
 
 
 

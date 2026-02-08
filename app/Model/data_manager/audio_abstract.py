@@ -1,18 +1,18 @@
 
-from scipy.signal import resample
+from scipy.signal import resample_poly
 import matplotlib.pyplot as plt
 from pathlib import Path
 import soundfile as sf
 import numpy as np
-# import librosa
 
 
+TARGET_SR = 48828
 
 class Audio_Abstract:
     def __init__(self, **kwargs):
         filepath = kwargs.get('filepath', None)
         self.path = Path(str(filepath)) if filepath is not None else None
-        self.sample_rate = kwargs.get('sample_rate', 48000)
+        self.sample_rate = kwargs.get('sample_rate', TARGET_SR)
         self.num_channels = kwargs.get('num_channels', 1)
         self.sample_length = kwargs.get('sample_length', None)
         self.data = kwargs.get('data', None)
@@ -46,30 +46,14 @@ class Audio_Abstract:
 
     # Function that loads data from filepath
     def load_data(self, filepath):
-        if self.num_channels > 1:
-            self.data, samplerate = sf.read(str(filepath), dtype='float32')
-            if samplerate != self.sample_rate:
-                # self.data = librosa.resample(y=self.data, orig_sr=samplerate, target_sr=self.sample_rate)
-                self.data = resample(self.data, self.sample_rate)
-            try:
-                self.data = self.data.reshape(-1, self.num_channels)  # Reshape to match the number of channels
-            except ValueError:
-                # print("The audio data cannot be reshaped to match the number of channels.")
-                # print(f'Path: {self.path}')
-                # print(f'Num Channels: {self.num_channels}')
-                return
+        self.data, samplerate = sf.read(str(filepath), dtype="float32", always_2d=False)
 
-            # Convert the interleaved data to deinterleaved format
-            self.data = np.transpose(self.data.copy())  # Rows are channels / columns are data
-            self.sample_length = round((self.data.shape[1] / self.sample_rate), 2)
-            self.num_samples = len(self.data[1])
+        if samplerate != self.sample_rate:
+            from scipy.signal import resample_poly
+            self.data = resample_poly(self.data, up=self.sample_rate, down=samplerate)
 
-        else:
-            self.data, samplerate = sf.read(str(filepath), dtype='float32')
-            # if samplerate != self.sample_rate:
-            #     self.data = librosa.resample(y=self.data, orig_sr=samplerate, target_sr=self.sample_rate)
-            self.sample_length = round((len(self.data) / self.sample_rate), 2)
-            self.num_samples = len(self.data)
+        self.num_samples = len(self.data)
+        self.sample_length = self.num_samples / self.sample_rate
 
     # Function that returns stats from the audio file
     def stats(self):
@@ -148,7 +132,7 @@ class Audio_Abstract:
             data=new_data,
             sample_rate=self.sample_rate,
             num_channels=1,
-            sample_length=round(len(new_data) / self.sample_rate, 2),
+            sample_length=(len(new_data) / self.sample_rate),
             name=f"{self.name}+{audio.name}",
         )
 
