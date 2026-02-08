@@ -36,6 +36,8 @@ class Main_Window(ctk.CTk):
         self.geometry(f'{configuration.window_width}x{configuration.window_height}+{center_x}+{center_y}')
         self.minsize(configuration.min_window_width, configuration.min_window_height)
 
+        self.resizable(False, False)
+
         self.Console_Frame = Console_Frame(self)
         self.Main_Frame = Main_Frame(self, self.Console_Frame, self.event_handler)
 

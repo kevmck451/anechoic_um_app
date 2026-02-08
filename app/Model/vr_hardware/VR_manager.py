@@ -90,7 +90,7 @@ class VR_Headset_Hardware:
     def update_vr_input_values_NC(self, stop_event, **kwargs):
         reaction_timer = kwargs.get('reaction_timer', None)
         while not stop_event.is_set():
-            time.sleep(0.1)
+            time.sleep(0.05)
         if reaction_timer:
             self.time_selection_given = reaction_timer.reaction_time()
 

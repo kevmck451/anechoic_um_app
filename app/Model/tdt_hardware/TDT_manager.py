@@ -1,8 +1,10 @@
 
 import sounddevice as sd
+import threading
 import time
 import os
 
+_sd_lock = threading.Lock()
 
 class TDT_Circuit:
     def __init__(self):
@@ -47,23 +49,22 @@ class TDT_Circuit:
         self.circuit.stop()
         self.circuit_state = False
 
-    def trigger_audio_sample_computer(self, audio_sample, time_bw_samples):
-        sd.play(audio_sample.data, audio_sample.sample_rate)
-        time.sleep(audio_sample.sample_length)
+    def trigger_audio_sample_computer(self, audio_sample, time_bw_samples=None):
+        with _sd_lock:
+            sd.play(audio_sample.data, audio_sample.sample_rate)
+            sd.wait()
         if time_bw_samples is not None:
             time.sleep(time_bw_samples)
 
-
-    def trigger_audio_sample(self, audio_sample, channel, time_bw_samples, **kwargs):
+    def trigger_audio_sample(self, audio_sample, channel, time_bw_samples=None, **kwargs):
         speaker_buffer = self.circuit.get_buffer(data_tag='speaker', mode='w')
         speaker_buffer.set(audio_sample.data)
         self.circuit.set_tag("chan", channel)
-        # gain = kwargs.get('gain', 1)
-        # self.circuit.set_tag("gain", gain)
-        sd.play(audio_sample.data, audio_sample.sample_rate)
-        self.circuit.trigger(trigger=1)
 
-        time.sleep(audio_sample.sample_length)
+        with _sd_lock:
+            sd.play(audio_sample.data, audio_sample.sample_rate)
+            self.circuit.trigger(trigger=1)
+            sd.wait()
 
         if time_bw_samples is not None:
             time.sleep(time_bw_samples)

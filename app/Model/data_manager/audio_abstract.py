@@ -143,10 +143,14 @@ class Audio_Abstract:
         self.data = self.data[:total_samples]
 
     def combine(self, audio):
-        self.data = np.concatenate((self.data, audio.data))
-        self.num_samples = len(self.data)
-        self.sample_length = round(self.num_samples / self.sample_rate, 2)
-        return self
+        new_data = np.concatenate((self.data, audio.data))
+        return Audio_Abstract(
+            data=new_data,
+            sample_rate=self.sample_rate,
+            num_channels=1,
+            sample_length=round(len(new_data) / self.sample_rate, 2),
+            name=f"{self.name}+{audio.name}",
+        )
 
 
 
