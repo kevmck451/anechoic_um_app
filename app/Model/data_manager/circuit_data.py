@@ -167,10 +167,10 @@ def load_warmup_data(testing_audio):
     return audio_sample_buffer, burst_buffer, channel_buffer
 
 
-def load_calibration_sample(time):
-    filepath = base_path('experiment files/audio')
-    audio_name = 'pink_noise.wav'
-    audio = Audio_Abstract(filepath=f'{filepath}/{audio_name}')
+def load_calibration_sample(audio_name, time):
+    filepath = base_path('experiment files/audio_bursts')
+    audio_name = audio_name
+    audio = Audio_Abstract(filepath=f'{filepath}/{audio_name}.wav')
     audio.crop(time)
 
     return audio

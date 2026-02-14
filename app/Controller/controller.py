@@ -52,7 +52,7 @@ class Controller:
         self.gui_sample_list_max_showing = 20
 
         # function to compare audio with audio_testing
-        length_of_testing_audio = 1
+        length_of_testing_audio = 2.5
         circuit_data.create_testing_audio(length_of_testing_audio)
 
 
@@ -583,7 +583,8 @@ class Controller:
         gain_sub = np.round(float(self.calibration_window.Main_Frame.option_var_gain_sub.get()), 2)
         total_gain = gain + gain_sub
         time = int(self.calibration_window.Main_Frame.option_var_times.get().split(' ')[1])
-        audio_sample = circuit_data.load_calibration_sample(time)
+        audio_name = self.calibration_window.Main_Frame.option_var_sample.get()
+        audio_sample = circuit_data.load_calibration_sample(audio_name, time)
 
 
         # function to play sample with those arguments

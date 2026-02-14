@@ -3,7 +3,9 @@ import customtkinter as ctk
 import tkinter as tk
 import numpy as np
 import warnings
+import os
 
+from app.Model.data_manager.circuit_data import base_path
 import app.View.configuration as configuration
 from app.Controller.events import Event
 
@@ -81,7 +83,18 @@ class Calibration_Frame(ctk.CTkFrame):
 
 
         # ----------------------------------------
-        sample_options = ['Pink Noise']
+        def get_list_of_bursts():
+            exp_dir = base_path("experiment files/audio_bursts")
+
+            audio_files = [
+                name.split('.')[0]
+                for name in os.listdir(exp_dir)
+                if name.lower().endswith(".wav")
+            ]
+
+            return audio_files
+
+        sample_options = get_list_of_bursts()
         dropdown_values_sample = [f'{x}' for x in sample_options]
         self.option_var_sample = tk.StringVar(value=dropdown_values_sample[0])  # Set initial value to the prompt text
         self.dropdown_sample = ctk.CTkOptionMenu(frame, variable=self.option_var_sample, values=dropdown_values_sample,
